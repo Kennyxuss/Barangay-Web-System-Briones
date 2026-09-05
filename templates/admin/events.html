@@ -1,0 +1,48 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Events{% endblock %}
+{% block page_subtitle %}Manage community events shown on the public site{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ url_for('admin_event_add') }}" class="btn btn-bc"><i class="bi bi-plus-lg me-1"></i>Add Event</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Image</th><th>Date</th><th>Title</th><th>Time</th><th>Location</th><th>Organizer</th><th>Status</th><th class="text-end no-print">Actions</th></tr></thead>
+      <tbody>
+        {% for e in events %}
+        <tr>
+          <td>
+            {% if e.image %}
+            <img src="{{ url_for('static', filename='uploads/' ~ e.image) }}" class="rounded object-fit-cover" width="68" height="46" alt="" style="object-fit:cover;">
+            {% else %}
+            <span class="d-inline-flex align-items-center justify-content-center bg-light border rounded text-muted" style="width:68px;height:46px;"><i class="bi bi-image"></i></span>
+            {% endif %}
+          </td>
+          <td class="fw-semibold text-nowrap">{{ e.event_date | datefmt('%b %d, %Y') }}</td>
+          <td class="fw-semibold">{{ e.title }}</td>
+          <td class="small text-nowrap">{{ e.start_time | timefmt }}{% if e.end_time %} – {{ e.end_time | timefmt }}{% endif %}</td>
+          <td>{{ e.location or '—' }}</td>
+          <td>{{ e.organizer or '—' }}</td>
+          <td>{{ status_badge(e.status) }}</td>
+          <td class="text-end no-print text-nowrap">
+            <a href="{{ url_for('admin_event_edit', event_id=e.id) }}" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_event_delete', event_id=e.id) }}"
+                    data-confirm-title="Delete event?"
+                    data-confirm-text='Delete "{{ e.title }}"? This cannot be undone.'>
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-5">No events recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

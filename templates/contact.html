@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Contact | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2">Contact Us</h1>
+    <p class="text-white-50 mb-0">We are here to serve you. Reach out for inquiries, feedback, or assistance.</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-building me-2"></i>Barangay Hall</div>
+        <ul class="list-group list-group-flush small">
+          <li class="list-group-item"><i class="bi bi-person-badge me-2 text-bc"></i>Punong Barangay: <strong>{{ settings.captain_name or '—' }}</strong></li>
+          <li class="list-group-item"><i class="bi bi-geo-alt me-2 text-bc"></i>{{ settings.address or '—' }}</li>
+          <li class="list-group-item"><i class="bi bi-telephone me-2 text-bc"></i>{{ settings.contact_number or '—' }}</li>
+          <li class="list-group-item"><i class="bi bi-envelope me-2 text-bc"></i>{{ settings.email or '—' }}</li>
+          <li class="list-group-item"><i class="bi bi-clock me-2 text-bc"></i>Monday – Friday, 8:00 AM – 5:00 PM</li>
+        </ul>
+      </div>
+      <div class="hotline-strip p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-broadcast me-2 text-danger"></i>Emergency Hotlines</h6>
+        {% for line in (settings.hotlines or '').split('\n') if line.strip() %}
+          <p class="mb-1 fw-semibold small">{{ line }}</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-chat-dots me-2"></i>Send Us an Inquiry</div>
+        <div class="card-body p-4">
+          <form method="post" action="{{ url_for('contact') }}">
+            {% from 'macros.html' import csrf %}{{ csrf() }}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                <input type="text" name="name" class="form-control" required maxlength="100"
+                       placeholder="Juan Dela Cruz">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email Address</label>
+                <input type="email" name="email" class="form-control" maxlength="120"
+                       placeholder="you@example.com">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+                <input type="text" name="subject" class="form-control" required maxlength="150"
+                       placeholder="What is your inquiry about?">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Message <span class="text-danger">*</span></label>
+                <textarea name="message" class="form-control" rows="5" required
+                          placeholder="Write your message here..."></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-bc mt-4 px-4">
+              <i class="bi bi-send me-1"></i>Submit Inquiry
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

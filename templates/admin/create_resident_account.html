@@ -1,0 +1,51 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Create Resident Account{% endblock %}
+{% block page_subtitle %}Create login for {{ resident.resident_id }} — {{ resident.first_name }} {{ resident.last_name }}{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+  <div class="col-xl-7">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-plus me-2"></i>Resident: {{ resident.resident_id }} — {{ resident.first_name }} {{ resident.middle_name or '' }} {{ resident.last_name }}</div>
+      <div class="card-body p-4">
+        <div class="alert alert-light small">
+          <strong>Purok:</strong> {{ resident.purok or '—' }} &nbsp;|&nbsp; <strong>Birth:</strong> {{ resident.birth_date | datefmt('%b %d, %Y') }} &nbsp;|&nbsp; <strong>Contact:</strong> {{ resident.contact_number or '—' }}
+        </div>
+        <form method="post" action="{{ url_for('admin_create_resident_account', resident_pk=resident.id) }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Username <span class="text-danger">*</span></label>
+              <input type="text" name="username" class="form-control" required maxlength="30" pattern="[A-Za-z0-9_.]+" value="{{ form.username or '' }}" placeholder="e.g., juan.delacruz">
+              <div class="form-text">Lowercase, 3-30 chars. Will be used to log in.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" class="form-control" required maxlength="100" value="{{ form.full_name or resident.first_name ~ ' ' ~ resident.last_name }}" >
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" maxlength="120" value="{{ form.email or resident.email or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Password <span class="text-danger">*</span></label>
+              <input type="password" name="password" class="form-control" required minlength="6">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+              <input type="password" name="confirm_password" class="form-control" required minlength="6">
+            </div>
+          </div>
+          <div class="alert alert-info small mt-3 py-2 mb-0">
+            <i class="bi bi-info-circle me-1"></i>Account will be created as <strong>resident</strong> role, active immediately, linked to this resident record. Resident can then log in via the unified login page.
+          </div>
+          <div class="d-flex gap-2 mt-4 pt-2 border-top">
+            <button type="submit" class="btn btn-bc px-4"><i class="bi bi-check-lg me-1"></i>Create Account</button>
+            <a href="{{ url_for('admin_residents') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

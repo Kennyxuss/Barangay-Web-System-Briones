@@ -1,0 +1,74 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}System account credentials are stored securely as hashes{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+  <div class="col-xl-7">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-gear me-2"></i>User Account</div>
+      <div class="card-body p-4">
+        <form method="post"
+              action="{{ url_for('admin_user_edit', user_id=user.id) if user else url_for('admin_user_add') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Username <span class="text-danger">*</span></label>
+              <input type="text" name="username" class="form-control" required maxlength="30"
+                     pattern="[A-Za-z0-9_.]+" value="{{ user.username or '' }}">
+              <div class="form-text">Letters, numbers, dot, underscore only.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" class="form-control" required maxlength="100"
+                     value="{{ user.full_name or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Role <span class="text-danger">*</span></label>
+              <select name="role" class="form-select" required>
+                <option value="staff" {{ 'selected' if user and user.role == 'staff' }}>Staff</option>
+                <option value="admin" {{ 'selected' if user and user.role == 'admin' }}>Administrator</option>
+                <option value="resident" {{ 'selected' if user and user.role == 'resident' }}>Resident</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" maxlength="120" value="{{ user.email or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <select name="status" class="form-select">
+                <option value="active" {{ 'selected' if not user or user.status == 'active' }}>Active</option>
+                <option value="pending" {{ 'selected' if user and user.status == 'pending' }}>Pending</option>
+                <option value="inactive" {{ 'selected' if user and user.status == 'inactive' }}>Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                Password {% if user %}<span class="text-muted fw-normal">(leave blank to keep current)</span>{% else %}<span class="text-danger">*</span>{% endif %}
+              </label>
+              <input type="password" name="password" class="form-control" minlength="6"
+                     {{ '' if not user else '' }}{{ '' if not user else '' }}
+                     autocomplete="new-password" placeholder="{{ 'Enter new password' if user else 'Min. 6 characters' }}"
+                     {{ 'required' if not user }}>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Confirm Password {% if not user %}<span class="text-danger">*</span>{% endif %}</label>
+              <input type="password" name="confirm_password" class="form-control" autocomplete="new-password"
+                     {{ 'required' if not user }}>
+            </div>
+          </div>
+          <div class="alert alert-info small mt-3 mb-0 py-2">
+            <i class="bi bi-key me-1"></i>Passwords are hashed with Werkzeug (PBKDF2) before storage.
+            Minimum length: 6 characters.
+          </div>
+          <div class="d-flex gap-2 mt-4 pt-2 border-top">
+            <button type="submit" class="btn btn-bc px-4"><i class="bi bi-check-lg me-1"></i>Save User</button>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

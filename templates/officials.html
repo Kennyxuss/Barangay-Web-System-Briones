@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Officials | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+
+{% macro official_card(o, wide=false) %}
+<div class="col-sm-6 {{ 'col-lg-3' if not wide else 'col-lg-6 mx-auto' }}">
+  <div class="card h-100 event-card text-center">
+    <div class="card-body p-4 d-flex flex-column align-items-center">
+      {% if o.photo %}
+      <img src="{{ url_for('static', filename='uploads/' ~ o.photo) }}" class="official-photo mb-3" alt="{{ o.full_name }}" style="object-fit:cover;">
+      {% else %}
+      <img src="{{ url_for('static', filename='images/avatar.svg') }}" class="official-photo mb-3" alt="{{ o.full_name }}">
+      {% endif %}
+      <h6 class="fw-bold mb-1">{{ o.full_name }}</h6>
+      <span class="badge bg-bc mb-2">{{ o.position }}</span>
+      <p class="small text-muted mb-1"><i class="bi bi-telephone me-1"></i>{{ o.contact_number or '—' }}</p>
+      {% if o.email %}<p class="small text-muted mb-0"><i class="bi bi-envelope me-1"></i>{{ o.email }}</p>{% endif %}
+    </div>
+    <div class="card-footer bg-white border-top-0 small text-muted">
+      Term: {{ o.term_start | datefmt('%Y') if o.term_start else '—' }} – {{ o.term_end | datefmt('%Y') if o.term_end else '—' }}
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2">Barangay Officials</h1>
+    <p class="text-white-50 mb-0">The men and women serving the community of Barangay {{ settings.barangay_name or '' }}</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  {% if captain %}
+  <div class="text-center mb-5">
+    <h2 class="section-title d-inline-block">Punong Barangay</h2>
+    <div class="row mt-4">{{ official_card(captain[0], wide=True) }}</div>
+  </div>
+  {% endif %}
+
+  {% if kagawads %}
+  <h2 class="section-title mb-4">Barangay Kagawad</h2>
+  <div class="row g-4 mb-5">
+    {% for o in kagawads %}{{ official_card(o) }}{% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row g-4 mb-5">
+    {% if sk %}
+    <div class="col-lg-12">
+      <h2 class="section-title mb-4">SK Chairperson</h2>
+      <div class="row g-4">{% for o in sk %}{{ official_card(o) }}{% endfor %}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if appointive %}
+  <h2 class="section-title mb-4">Appointive Officials</h2>
+  <div class="row g-4 mb-5">
+    {% for o in appointive %}{{ official_card(o) }}{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if others %}
+  <h2 class="section-title mb-4">Other Officials &amp; Personnel</h2>
+  <div class="row g-4">
+    {% for o in others %}{{ official_card(o) }}{% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

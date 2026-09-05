@@ -1,0 +1,143 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Reports{% endblock %}
+{% block page_subtitle %}Generated {{ generated }}{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-end mb-3 no-print">
+  <button class="btn btn-outline-secondary" data-print><i class="bi bi-printer me-1"></i>Print Report</button>
+</div>
+
+<!-- ============ RESIDENT REPORT ============ -->
+<h5 id="residents-report" class="fw-bold text-bc mt-2"><i class="bi bi-people me-2"></i>Resident Report</h5>
+<div class="row g-3 mb-3">
+  {% set rstats = [
+    ('Total Residents', stats.total), ('Male', stats.male),
+    ('Female', stats.female), ('Registered Voters', stats.voters)
+  ] %}
+  {% for label, value in rstats %}
+  <div class="col-6 col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body py-3 d-flex align-items-center gap-3">
+        <div class="value">{{ value }}</div>
+        <small class="text-muted fw-semibold">{{ label }}</small>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">Population by Purok</div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead><tr><th>Purok</th><th>Male</th><th>Female</th><th>Total</th></tr></thead>
+          <tbody>
+            {% for row in purok_rows %}
+            <tr><td>{{ row.label }}</td><td>{{ row.m or 0 }}</td><td>{{ row.f or 0 }}</td><td class="fw-semibold">{{ row.c }}</td></tr>
+            {% else %}<tr><td colspan="4" class="text-center text-muted py-3">No data.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card mb-3">
+      <div class="card-header">By Age Group</div>
+      <ul class="list-group list-group-flush small">
+        {% for grp, count in ages %}
+        <li class="list-group-item d-flex justify-content-between">{{ grp }}<span class="badge bg-light text-dark border">{{ count }}</span></li>
+        {% else %}<li class="list-group-item text-muted">No data.</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-header">Voter &amp; Residency Status</div>
+      <ul class="list-group list-group-flush small">
+        <li class="list-group-item d-flex justify-content-between">Registered Voters<span class="badge bg-success-subtle text-success border border-success-subtle">{{ stats.voters }}</span></li>
+        <li class="list-group-item d-flex justify-content-between">Non-Voters / Unspecified<span class="badge bg-light text-dark border">{{ stats.total - stats.voters }}</span></li>
+        {% for row in residency_rows %}
+        <li class="list-group-item d-flex justify-content-between">Residency: {{ row.label }}<span class="badge bg-light text-dark border">{{ row.c }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+<a href="{{ url_for('admin_export', which='residents') }}" class="btn btn-outline-bc btn-sm mb-5 no-print">
+  <i class="bi bi-filetype-csv me-1"></i>Export Residents CSV
+</a>
+
+<!-- ============ DOCUMENT REPORT ============ -->
+<h5 id="documents-report" class="fw-bold text-bc mt-4"><i class="bi bi-file-earmark-text me-2"></i>Document Requests Report</h5>
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card stat-card h-100">
+      <div class="card-body py-3 d-flex align-items-center gap-3">
+        <div class="value">{{ doc_total }}</div><small class="text-muted fw-semibold">Total Requests</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card h-100">
+      <div class="card-header py-2">By Status</div>
+      <div class="card-body p-0">
+        <div class="d-flex flex-wrap gap-3 p-3">
+          {% for st in ['Pending', 'Processing', 'Approved', 'Released', 'Rejected'] %}
+          <div class="text-center px-3 py-2 rounded" style="background:var(--bc-primary-light);">
+            <div class="fw-bold fs-5">{{ doc_by_status.get(st, 0) }}</div>
+            <small class="text-muted">{{ st }}</small>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card mb-3">
+  <div class="card-header">Requests by Document Type</div>
+  <div class="table-responsive">
+    <table class="table table-sm table-striped align-middle mb-0">
+      <thead><tr><th>Document Type</th><th class="w-25">Count</th></tr></thead>
+      <tbody>
+        {% for t in doc_by_type %}
+        <tr><td>{{ t.document_type }}</td><td>{{ t.c }}</td></tr>
+        {% else %}<tr><td colspan="2" class="text-center text-muted py-3">No requests yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<a href="{{ url_for('admin_export', which='documents') }}" class="btn btn-outline-bc btn-sm mb-5 no-print">
+  <i class="bi bi-filetype-csv me-1"></i>Export Documents CSV
+</a>
+
+<!-- ============ COMPLAINT REPORT ============ -->
+<h5 id="complaints-report" class="fw-bold text-bc mt-4"><i class="bi bi-megaphone me-2"></i>Complaints Report</h5>
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card stat-card h-100">
+      <div class="card-body py-3 d-flex align-items-center gap-3">
+        <div class="value">{{ cmp_total }}</div><small class="text-muted fw-semibold">Total Complaints</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card h-100">
+      <div class="card-header py-2">By Status</div>
+      <div class="card-body p-0">
+        <div class="d-flex flex-wrap gap-3 p-3">
+          {% for st in ['Pending', 'Investigating', 'Resolved', 'Closed'] %}
+          <div class="text-center px-3 py-2 rounded" style="background:var(--bc-primary-light);">
+            <div class="fw-bold fs-5">{{ cmp_by_status.get(st, 0) }}</div>
+            <small class="text-muted">{{ st }}</small>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="small text-muted">Blotter records on file: <strong>{{ blt_total }}</strong></p>
+<a href="{{ url_for('admin_export', which='complaints') }}" class="btn btn-outline-bc btn-sm no-print">
+  <i class="bi bi-filetype-csv me-1"></i>Export Complaints CSV
+</a>
+{% endblock %}

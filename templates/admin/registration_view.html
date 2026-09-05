@@ -1,0 +1,85 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Review Registration{% endblock %}
+{% block page_subtitle %}Pending account: {{ user.username }} — {{ resident.resident_id if resident else 'No resident linked' }}{% endblock %}
+
+{% block admin_content %}
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-person-badge me-2"></i>Account: {{ user.username }} <span class="badge bg-warning text-dark ms-2">Pending</span></span>
+    <span class="small text-muted">Submitted: {{ user.created_at | datefmt('%B %d, %Y %I:%M %p') }}</span>
+  </div>
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3 small text-muted">Username</dt><dd class="col-sm-9 fw-semibold">{{ user.username }}</dd>
+      <dt class="col-sm-3 small text-muted">Full Name (account)</dt><dd class="col-sm-9">{{ user.full_name }}</dd>
+      <dt class="col-sm-3 small text-muted">Email (account)</dt><dd class="col-sm-9">{{ user.email or '—' }}</dd>
+      <dt class="col-sm-3 small text-muted">Role / Status</dt><dd class="col-sm-9"><span class="badge bg-success">{{ user.role }}</span> <span class="badge bg-warning text-dark">{{ user.status }}</span></dd>
+    </dl>
+  </div>
+</div>
+
+{% if not resident %}
+<div class="alert alert-danger">This pending account is not linked to any resident record. Reject it or link manually.</div>
+{% else %}
+<!-- Exact same view as admin/resident_view.html for full info -->
+<div class="card mb-4">
+  <div class="card-body p-4">
+    <div class="d-flex flex-column flex-md-row align-items-center gap-4 pb-3 border-bottom">
+      {% if resident.photo %}
+      <img src="{{ url_for('static', filename='uploads/' ~ resident.photo) }}" class="avatar-lg" alt="Resident photo" style="width:120px;height:120px;object-fit:cover;border-radius:50%;">
+      {% else %}
+      <img src="{{ url_for('static', filename='images/avatar.svg') }}" class="avatar-lg" alt="Resident photo" style="width:120px;height:120px;object-fit:cover;border-radius:50%;">
+      {% endif %}
+      <div class="text-center text-md-start flex-grow-1">
+        <h4 class="fw-bold mb-1">{{ resident.first_name }} {{ resident.middle_name or '' }} {{ resident.last_name }} {{ resident.suffix or '' }}</h4>
+        <span class="badge bg-bc">{{ resident.resident_id }}</span>
+        <span class="badge bg-warning text-dark ms-1">Pending Review</span>
+      </div>
+      <div class="d-flex gap-2 flex-wrap justify-content-center">
+        <a href="{{ url_for('admin_resident_view', resident_pk=resident.id) }}" class="btn btn-outline-primary btn-sm" target="_blank">
+          <i class="bi bi-box-arrow-up-right me-1"></i>Open Resident Profile
+        </a>
+      </div>
+    </div>
+
+    <dl class="row mb-0 mt-3">
+      <dt class="col-sm-4 small text-muted fw-normal">Resident ID</dt><dd class="col-sm-8">{{ resident.resident_id }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Full Name</dt>
+      <dd class="col-sm-8">{{ resident.first_name }} {{ resident.middle_name or '' }} {{ resident.last_name }} {{ resident.suffix or '' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Birth Date</dt>
+      <dd class="col-sm-8">{{ resident.birth_date | datefmt }} (Age: {{ resident.birth_date | age or '—' }})</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Place of Birth</dt><dd class="col-sm-8">{{ resident.birth_place or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Sex</dt><dd class="col-sm-8">{{ resident.sex or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Civil Status</dt><dd class="col-sm-8">{{ resident.civil_status or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Nationality / Religion</dt>
+      <dd class="col-sm-8">{{ resident.nationality or '—' }} / {{ resident.religion or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Occupation</dt><dd class="col-sm-8">{{ resident.occupation or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Contact Number</dt><dd class="col-sm-8">{{ resident.contact_number or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Email</dt><dd class="col-sm-8">{{ resident.email or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Address</dt><dd class="col-sm-8">{{ resident.address or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Purok</dt><dd class="col-sm-8">{{ resident.purok or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Voter Status</dt><dd class="col-sm-8">{{ resident.voter_status or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Residency Status</dt><dd class="col-sm-8">{{ resident.residency_status or '—' }}</dd>
+      <dt class="col-sm-4 small text-muted fw-normal">Registered On</dt><dd class="col-sm-8">{{ resident.created_at | datefmt('%B %d, %Y %I:%M %p') }}</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body d-flex gap-2 justify-content-center flex-wrap">
+    <form method="post" action="{{ url_for('admin_registration_approve', user_id=user.id) }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-success btn-lg px-5"><i class="bi bi-check-circle me-2"></i>Approve — Activate Account</button>
+    </form>
+    <form method="post" action="{{ url_for('admin_registration_reject', user_id=user.id) }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-outline-danger btn-lg px-4"><i class="bi bi-x-circle me-2"></i>Reject — Delete Account</button>
+    </form>
+    <a href="{{ url_for('admin_pending_registrations') }}" class="btn btn-outline-secondary btn-lg">Back to List</a>
+  </div>
+  <div class="card-footer small text-muted text-center">
+    Approving will set the account to <strong>active</strong> and the resident can log in immediately. Rejecting deletes the login account; the resident record is kept for audit (delete manually via Residents if needed).
+  </div>
+</div>
+{% endif %}
+{% endblock %}

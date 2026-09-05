@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard | {{ system_name }}{% endblock %}
+{% block content %}
+<section class="hero-section py-4">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-person-circle me-2"></i>Welcome, {{ current_user.full_name }}!</h2>
+    <p class="text-white-50 mb-0">Resident ID: {{ resident.resident_id if resident else '—' }} &nbsp;|&nbsp; {{ resident.purok if resident else '' }} &nbsp;|&nbsp; <span class="badge bg-warning text-dark">{{ current_user.role | title }}</span></p>
+  </div>
+</section>
+
+<div class="container py-4">
+  <!-- Resident nav -->
+  <ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('resident_dashboard') }}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_profile') }}"><i class="bi bi-person-badge me-1"></i>My Profile</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_my_documents') }}"><i class="bi bi-file-earmark-text me-1"></i>My Documents</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_my_complaints') }}"><i class="bi bi-megaphone me-1"></i>My Complaints</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_change_password') }}"><i class="bi bi-key me-1"></i>Change Password</a></li>
+    <li class="nav-item ms-auto"><a class="nav-link text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left me-1"></i>Logout</a></li>
+  </ul>
+
+  {% if not resident %}
+  <div class="alert alert-warning">Your account is not linked to a resident record. Please visit the Barangay Hall to link your account.</div>
+  {% else %}
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card text-center p-3">
+        <div class="fs-3 text-primary"><i class="bi bi-person-vcard"></i></div>
+        <div class="fw-bold">{{ resident.first_name }} {{ resident.last_name }}</div>
+        <small class="text-muted">{{ resident.resident_id }}</small>
+        <small class="text-muted d-block">{{ resident.purok }} &bull; {{ resident.sex }} &bull; {{ resident.birth_date | age }} yrs</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <small class="text-muted">Pending Documents</small>
+        <div class="fs-3 fw-bold">{{ doc_pending }}</div>
+        <a href="{{ url_for('resident_my_documents') }}" class="small">View requests &rarr;</a>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <small class="text-muted">Open Complaints</small>
+        <div class="fs-3 fw-bold">{{ cmp_open }}</div>
+        <a href="{{ url_for('resident_my_complaints') }}" class="small">View complaints &rarr;</a>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3 bg-warning-subtle">
+        <small class="text-muted">Quick Actions</small>
+        <a href="{{ url_for('resident_request_document') }}" class="btn btn-bc btn-sm mt-2 w-100"><i class="bi bi-file-earmark-plus me-1"></i>Request Document</a>
+        <a href="{{ url_for('resident_file_complaint') }}" class="btn btn-outline-danger btn-sm mt-2 w-100"><i class="bi bi-megaphone me-1"></i>File Complaint</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-file-earmark-text me-2"></i>Recent Document Requests</span>
+          <a href="{{ url_for('resident_my_documents') }}" class="btn btn-sm btn-outline-primary">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Req #</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for d in my_docs %}
+              <tr><td class="small fw-semibold">{{ d.request_number }}</td><td class="small">{{ d.document_type }}</td><td class="small">{{ d.request_date | datefmt('%b %d, %Y') }}</td><td>{{ status_badge(d.status) }}</td></tr>
+              {% else %}
+              <tr><td colspan="4" class="text-center text-muted small py-3">No requests yet. <a href="{{ url_for('resident_request_document') }}">Request now</a></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-megaphone me-2"></i>Recent Complaints</span>
+          <a href="{{ url_for('resident_my_complaints') }}" class="btn btn-sm btn-outline-primary">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Complaint #</th><th>Subject</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for c in my_complaints %}
+              <tr><td class="small fw-semibold">{{ c.complaint_number }}</td><td class="small">{{ c.subject[:30] }}</td><td class="small">{{ c.date_reported | datefmt('%b %d, %Y') }}</td><td>{{ status_badge(c.status) }}</td></tr>
+              {% else %}
+              <tr><td colspan="4" class="text-center text-muted small py-3">No complaints yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

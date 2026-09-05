@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}File Complaint | {{ system_name }}{% endblock %}
+{% block content %}
+<section class="hero-section py-4">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-megaphone me-2"></i>File a Complaint</h2>
+    <p class="text-white-50 mb-0">Logged in as {{ resident.first_name }} {{ resident.last_name }} — {{ resident.resident_id }}</p>
+  </div>
+</section>
+<div class="container py-4">
+  <ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_dashboard') }}">Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_my_complaints') }}">My Complaints</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('resident_file_complaint') }}">New Complaint</a></li>
+  </ul>
+
+  <div class="card">
+    <div class="card-header"><i class="bi bi-pencil-square me-2"></i>Complaint Form — auto-filled from your profile</div>
+    <div class="card-body p-4">
+      <div class="alert alert-light small">
+        <strong>Complainant:</strong> {{ resident.first_name }} {{ resident.last_name }} &nbsp;|&nbsp; <strong>Contact:</strong> {{ resident.contact_number or '—' }} &nbsp;|&nbsp; <strong>Address:</strong> {{ resident.address }}
+      </div>
+      <form method="post" action="{{ url_for('resident_file_complaint') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Contact Number</label>
+            <input type="tel" name="contact_number" class="form-control" maxlength="20" value="{{ form.contact_number or resident.contact_number or '' }}" placeholder="0917-000-0000">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Email</label>
+            <input type="email" name="email" class="form-control" maxlength="120" value="{{ form.email or resident.email or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Location</label>
+            <input type="text" name="location" class="form-control" maxlength="150" value="{{ form.location or '' }}" placeholder="e.g., Purok 3 near chapel">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+            <input type="text" name="subject" class="form-control" required maxlength="150" value="{{ form.subject or '' }}" placeholder="Brief summary">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+            <textarea name="description" class="form-control" rows="5" required maxlength="2000" placeholder="Describe what happened...">{{ form.description or '' }}</textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-danger btn-lg mt-4 px-5"><i class="bi bi-send me-2"></i>Submit Complaint</button>
+        <a href="{{ url_for('resident_my_complaints') }}" class="btn btn-outline-secondary btn-lg mt-4 ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

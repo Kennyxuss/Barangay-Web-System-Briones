@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import confirm_modal %}
+
+{% block title %}{% block admin_title %}Dashboard{% endblock %} | Admin | {{ system_name }}{% endblock %}
+
+{% block navbar %}
+<div class="admin-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="adminSidebar">
+    <div class="brand-area">
+      {% if settings.logo %}
+      <img src="{{ url_for('static', filename='uploads/' ~ settings.logo) }}" width="42" height="42" class="rounded-circle bg-white p-1" style="object-fit:cover;" alt="">
+      {% else %}
+      <img src="{{ url_for('static', filename='images/logo.svg') }}" width="42" height="42" class="rounded-circle bg-white p-1" alt="">
+      {% endif %}
+      <div class="system-title">
+        <strong>BarangayConnect</strong><br>
+        <small>ADMIN PANEL</small>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      {% set is_admin = current_user.role == 'admin' %}
+      <div class="nav-label">Main</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if request.path == '/admin' }}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+
+      <div class="nav-label">Community</div>
+      <a data-bs-toggle="collapse" href="#menuResidents" aria-expanded="{{ 'true' if request.path.startswith('/admin/residents') else 'false' }}">
+        <i class="bi bi-people-fill"></i> Residents
+        <i class="bi bi-chevron-down chev small"></i>
+      </a>
+      <div class="collapse {{ 'show' if request.path.startswith('/admin/residents') }}" id="menuResidents">
+        <a href="{{ url_for('admin_residents') }}" class="sub-link {{ 'active fw-semibold' if request.path == '/admin/residents' }}">All Residents</a>
+        <a href="{{ url_for('admin_resident_add') }}" class="sub-link {{ 'active fw-semibold' if request.path == '/admin/residents/add' }}">Add Resident</a>
+        <a href="{{ url_for('admin_reports') }}#residents-report" class="sub-link">Resident Reports</a>
+      </div>
+      {% if is_admin %}
+      <a href="{{ url_for('admin_officials') }}" class="{{ 'active' if request.path.startswith('/admin/officials') }}">
+        <i class="bi bi-person-badge-fill"></i> Barangay Officials
+      </a>
+      {% endif %}
+
+      <div class="nav-label">Services</div>
+      <a data-bs-toggle="collapse" href="#menuDocuments" aria-expanded="{{ 'true' if request.path.startswith('/admin/documents') else 'false' }}">
+        <i class="bi bi-file-earmark-text-fill"></i> Documents
+        <i class="bi bi-chevron-down chev small"></i>
+      </a>
+      <div class="collapse {{ 'show' if request.path.startswith('/admin/documents') }}" id="menuDocuments">
+        <a href="{{ url_for('admin_documents') }}" class="sub-link {{ 'active fw-semibold' if request.path == '/admin/documents' }}">Document Requests</a>
+        <a href="{{ url_for('admin_documents', status='Approved') }}" class="sub-link {{ 'active fw-semibold' if request.args.get('status') == 'Approved' }}">Approved</a>
+        <a href="{{ url_for('admin_documents', status='Released') }}" class="sub-link {{ 'active fw-semibold' if request.args.get('status') == 'Released' }}">Released</a>
+      </div>
+      <a data-bs-toggle="collapse" href="#menuComplaints" aria-expanded="{{ 'true' if request.path.startswith('/admin/complaints') else 'false' }}">
+        <i class="bi bi-megaphone-fill"></i> Complaints
+        <i class="bi bi-chevron-down chev small"></i>
+      </a>
+      <div class="collapse {{ 'show' if request.path.startswith('/admin/complaints') }}" id="menuComplaints">
+        <a href="{{ url_for('admin_complaints') }}" class="sub-link {{ 'active fw-semibold' if not request.args.get('status') }}">All Complaints</a>
+        <a href="{{ url_for('admin_complaints', status='Pending') }}" class="sub-link {{ 'active fw-semibold' if request.args.get('status') == 'Pending' }}">Pending</a>
+      </div>
+      {% if is_admin %}
+      <a href="{{ url_for('admin_blotter') }}" class="{{ 'active' if request.path.startswith('/admin/blotter') }}">
+        <i class="bi bi-journal-bookmark-fill"></i> Blotter Records
+      </a>
+      {% endif %}
+
+      <div class="nav-label">Content</div>
+      <a href="{{ url_for('admin_announcements') }}" class="{{ 'active' if request.path.startswith('/admin/announcements') }}">
+        <i class="bi bi-megaphone"></i> Announcements
+      </a>
+      {% if is_admin %}
+      <a href="{{ url_for('admin_events') }}" class="{{ 'active' if request.path.startswith('/admin/events') }}">
+        <i class="bi bi-calendar-event-fill"></i> Events
+      </a>
+      {% endif %}
+
+      <div class="nav-label">System</div>
+      {% if is_admin %}
+      <a href="{{ url_for('admin_users') }}" class="{{ 'active' if request.path.startswith('/admin/users') }}">
+        <i class="bi bi-person-gear"></i> Users
+      </a>
+      <a href="{{ url_for('admin_pending_registrations') }}" class="{{ 'active' if request.path.startswith('/admin/registrations') }}">
+        <i class="bi bi-person-plus-fill"></i> Pending Registrations
+      </a>
+      {% endif %}
+      <a href="{{ url_for('admin_reports') }}" class="{{ 'active' if request.path == '/admin/reports' }}">
+        <i class="bi bi-bar-chart-line-fill"></i> Reports
+      </a>
+      {% if is_admin %}
+      <a href="{{ url_for('admin_activity_logs') }}" class="{{ 'active' if request.path == '/admin/activity-logs' }}">
+        <i class="bi bi-clock-history"></i> Activity Logs
+      </a>
+      <a href="{{ url_for('admin_settings') }}" class="{{ 'active' if request.path == '/admin/settings' }}">
+        <i class="bi bi-gear-fill"></i> Settings
+      </a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}">
+        <i class="bi bi-box-arrow-left"></i> Logout
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main area -->
+  <div class="admin-main">
+    <header class="topbar px-3 py-2 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-secondary btn-sm d-lg-none" id="sidebarToggle"
+                aria-label="Toggle sidebar"><i class="bi bi-list fs-5"></i></button>
+        <div>
+          <h6 class="page-title">{% block page_title %}{% endblock %}</h6>
+          <span class="page-subtitle d-none d-md-block">{% block page_subtitle %}{% endblock %}</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <a href="{{ url_for('home') }}" class="btn btn-sm btn-outline-bc d-none d-md-inline-flex">
+          <i class="bi bi-globe2 me-1"></i> Public Site
+        </a>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-light border dropdown-toggle d-flex align-items-center gap-2"
+                  data-bs-toggle="dropdown">
+            <img src="{{ url_for('static', filename='images/avatar.svg') }}" width="28" height="28"
+                 class="rounded-circle" alt="">
+            <span class="small fw-semibold">{{ current_user.full_name }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><h6 class="dropdown-header">{{ current_user.username }} ·
+              <span class="badge {{ 'bg-danger' if current_user.role == 'admin' else 'bg-primary' }}">{{ current_user.role | title }}</span></h6></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="admin-content">
+      {% block admin_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{{ confirm_modal() }}
+{% endblock %}
+
+{% block footer %}{% endblock %}

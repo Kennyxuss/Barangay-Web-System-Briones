@@ -1,0 +1,46 @@
+<footer class="public-footer mt-auto py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <h5 class="text-white fw-bold">Barangay {{ settings.barangay_name or '' }}</h5>
+        <p class="small mb-1"><i class="bi bi-geo-alt me-2"></i>{{ settings.address or '' }}</p>
+        <p class="small mb-1"><i class="bi bi-telephone me-2"></i>{{ settings.contact_number or '—' }}</p>
+        <p class="small mb-0"><i class="bi bi-envelope me-2"></i>{{ settings.email or '—' }}</p>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="text-white">Quick Links</h6>
+        <ul class="list-unstyled small">
+          <li><a href="{{ url_for('about') }}">About Barangay</a></li>
+          <li><a href="{{ url_for('public_officials') }}">Barangay Officials</a></li>
+          <li><a href="{{ url_for('public_announcements') }}">Announcements</a></li>
+          <li><a href="{{ url_for('public_events') }}">Events</a></li>
+          <li><a href="{{ url_for('services') }}">Services</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-3">
+        <h6 class="text-white">Resident Services</h6>
+        <ul class="list-unstyled small">
+          <li><a href="{{ url_for('request_document') }}">Request a Document</a></li>
+          <li><a href="{{ url_for('request_status') }}">Check Request Status</a></li>
+          <li><a href="{{ url_for('complaint_file') }}">File a Complaint</a></li>
+          <li><a href="{{ url_for('complaint_status') }}">Check Complaint Status</a></li>
+          <li><a href="{{ url_for('contact') }}">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-3">
+        <h6 class="text-white">Emergency Hotlines</h6>
+        <div class="small">
+          {% for line in (settings.hotlines or '').split('\n') if line.strip() %}
+            <p class="mb-1">{{ line }}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <hr class="border-secondary mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between small">
+      <span>&copy; {{ current_year }} Barangay {{ settings.barangay_name or '' }}, {{ settings.municipality or '' }},
+        {{ settings.province or '' }}. All rights reserved.</span>
+      <span>Powered by <strong class="text-white">BarangayConnect</strong> — Barangay Management and Information System</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,170 @@
+================================================================================
+  INSTRUCTIONS AND FEATURES - Brgy. Wao Lanao Del Sur Barangay Web System
+================================================================================
+
+--------------------------------------------------------------------------------
+1. INSTRUCTIONS (How to Run)
+--------------------------------------------------------------------------------
+1. Install Python 3.9 or newer.
+2. Open terminal in project folder: C:\Users\Administrator\Desktop\FINALL\FINALY\Barangay-Web-System-Briones
+3. Create virtual environment: python -m venv venv
+   Activate: venv\Scripts\activate  (Windows)
+4. Install requirements: pip install -r requirements.txt
+5. Run: python app.py
+6. Open browser: http://127.0.0.1:5000
+
+Default Login:
+  Admin : admin / admin123
+  Staff : staff / staff123
+  -> Change password after login: Admin > Users > Edit
+
+To reset database: stop server, delete barangay.db, run python app.py again.
+To backup: copy barangay.db file.
+
+--------------------------------------------------------------------------------
+2. FEATURES
+--------------------------------------------------------------------------------
+- Resident Records Management (add, edit, view, delete, search, filter by purok)
+- Document Requests (Barangay Clearance, Residency, Indigency, etc.) with tracking number
+- Complaint System with tracking number
+- Blotter Records for incidents
+- Announcements with pictures
+- Events with pictures
+- Barangay Officials Management
+- User Accounts (Admin, Staff, Resident) with approval for new residents
+- Dashboard with charts (Residents by Purok, Gender, Age)
+- Reports and CSV Export
+- Activity Logs and System Settings
+- Public website for residents to view info and request services
+
+--------------------------------------------------------------------------------
+3. EVERY PAGE - PURPOSE (What Each Page Is For)
+--------------------------------------------------------------------------------
+
+PUBLIC PAGES (No Login Needed):
+
+/ (Home)                          - Main landing page. Shows Welcome to Brgy. Wao Lanao,
+                                    total residents/officials, hotline, quick links,
+                                    latest 3 announcements and upcoming 3 events.
+
+/about                            - Description of the barangay. Shows history, mission,
+                                    vision, goals, address, and contact info.
+
+/officials                        - Shows all barangay officials. Grouped by position:
+                                    Punong Barangay, Kagawads, SK Chairperson, Secretary,
+                                    Treasurer. For residents to know who serves them.
+
+/announcements                    - List of all published announcements/news from barangay.
+                                    Searchable. Residents can read important advisories.
+
+/announcements/<id>               - Details of one announcement with picture and full content.
+
+/events                           - List of community events. Shows upcoming events (with
+                                    pictures, date, time, location) and past events table.
+
+/services                         - Description of services offered (Clearance, Residency,
+                                    Indigency, Business Clearance, etc.)
+
+/contact                          - Contact form to send inquiries/messages to barangay hall.
+                                    Also shows address and hotlines.
+
+/login                            - Login page for Admin, Staff, and Residents.
+
+/register                         - Registration page for residents to create account.
+                                    Requires personal info and will be pending until admin approves.
+
+/request-document                 - Public form to request barangay documents. Gives a
+                                    tracking number (REQ-...).
+
+/request-status                   - Check status of document request using tracking number.
+                                    Shows if Pending, Approved, Released, etc.
+
+/complaint                        - Form to file a complaint. Gives tracking number (CMP-...).
+
+/complaint-status                 - Check status of complaint using tracking number.
+
+----------------------------------------
+RESIDENT PAGES (Login as Resident):
+
+/resident/dashboard               - Resident's personal dashboard. Shows own profile summary,
+                                    pending document requests and complaints count, and
+                                    last 5 requests/complaints.
+
+/resident/profile                 - Shows resident's personal details and photo.
+
+/resident/profile/edit            - Edit own contact number, email, address, purok, etc.
+
+/resident/documents               - List of own document requests and their status.
+
+/resident/documents/request       - Request a new document (logged-in version, auto-filled name).
+
+/resident/complaints              - List of own complaints.
+
+/resident/complaints/new          - File a new complaint as logged-in resident.
+
+/resident/change-password         - Change own password.
+
+----------------------------------------
+ADMIN PAGES (Login as Admin/Staff):
+
+/admin (Dashboard)                - Overall display of the barangay. Shows 8 stat cards
+                                    (Total Residents, Male/Female, Voters, Pending Docs,
+                                    Pending Complaints, Upcoming Events, Active Officials)
+                                    + charts: Residents by Gender, by Age Group, by Purok,
+                                    and Document/Complaint Status + recent activity and
+                                    upcoming events list.
+
+/admin/residents                  - List of all residents with search and filters (sex, purok,
+                                    voter). For managing resident records.
+
+/admin/residents/add              - Form to add a new resident.
+
+/admin/residents/view/<id>        - View full details of one resident and print profile.
+
+/admin/residents/edit/<id>        - Edit resident information and photo.
+
+/admin/residents/<id>/create-account - Create a login account for an existing resident.
+
+/admin/officials                  - List of barangay officials for admin to manage.
+
+/admin/officials/add/edit         - Add or edit official details and photo.
+
+/admin/announcements              - List of announcements for admin to manage.
+
+/admin/announcements/add/edit     - Create or edit announcement with picture.
+
+/admin/events                     - List of events for admin to manage (with image thumbnail).
+
+/admin/events/add/edit            - Create or edit event with picture, date, time, location.
+
+/admin/documents                  - List of all document requests. Admin can update status
+                                    (Pending, Processing, Approved, Released, Rejected).
+
+/admin/complaints                 - List of all complaints and inquiries. Admin can update
+                                    status and assign.
+
+/admin/blotter                    - List of blotter/incident records (admin only).
+
+/admin/blotter/add/edit           - Add or edit blotter record.
+
+/admin/users                      - List of system users (admin only). Manage accounts.
+
+/admin/users/add/edit             - Add or edit user account.
+
+/admin/registrations              - List of pending resident registrations waiting for approval.
+
+/admin/registrations/<id>         - View pending registration details. Approve or Reject.
+
+/admin/reports                    - Reports page. Shows summary of residents by purok,
+                                    by age, voter status, document and complaint counts.
+                                    Printable and exportable to CSV.
+
+/admin/activity-logs              - Shows history of all actions done in system (who did what and when).
+
+/admin/settings                   - Change barangay info: name (Wao), municipality, province,
+                                    address, contact, logo, history, mission, vision, goals,
+                                    hotlines. Changes appear on public pages.
+
+================================================================================
+END OF FILE
+================================================================================

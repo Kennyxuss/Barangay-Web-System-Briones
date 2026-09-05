@@ -1,0 +1,163 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Overview of barangay records and services{% endblock %}
+
+{% block admin_content %}
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  {% set cards = [
+    ('Total Residents', cards.total_residents, 'bi-people-fill', ''),
+    ('Male Residents', cards.male, 'bi-gender-male', 'accent-blue'),
+    ('Female Residents', cards.female, 'bi-gender-female', 'accent-purple'),
+    ('Registered Voters', cards.voters, 'bi-check2-square', 'accent-teal'),
+    ('Pending Doc. Requests', cards.pending_docs, 'bi-file-earmark-text-fill', 'accent-orange'),
+    ('Pending Complaints', cards.pending_complaints, 'bi-megaphone-fill', 'accent-red'),
+    ('Upcoming Events', cards.upcoming_events, 'bi-calendar-event-fill', 'accent-gold'),
+    ('Active Officials', cards.active_officials, 'bi-person-badge-fill', '')
+  ] %}
+  {% for label, value, icon, accent in cards %}
+  <div class="col-6 col-md-4 col-xl-3">
+    <div class="card stat-card h-100 {{ accent }}">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-wrap"><i class="bi {{ icon }}"></i></div>
+        <div>
+          <div class="value">{{ value }}</div>
+          <small class="text-muted fw-semibold">{{ label }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Charts -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-gender-ambiguous me-2"></i>Residents by Gender</div>
+      <div class="card-body"><div style="position:relative;height:260px;"><canvas id="chartGender"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Residents by Age Group</div>
+      <div class="card-body"><div style="position:relative;height:260px;"><canvas id="chartAge"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-geo me-2"></i>Residents by Purok</div>
+      <div class="card-body"><div style="position:relative;height:280px;"><canvas id="chartPurok"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-pie-chart me-2"></i>Document &amp; Complaint Status</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <p class="text-center small fw-bold mb-2">Document Requests</p>
+            <div style="position:relative;height:220px;"><canvas id="chartDocs"></canvas></div>
+          </div>
+          <div class="col-sm-6">
+            <p class="text-center small fw-bold mb-2">Complaints</p>
+            <div style="position:relative;height:220px;"><canvas id="chartComplaints"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Recent activity -->
+  <div class="col-xl-8">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history me-2"></i>Recent Activity</span>
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin_activity_logs') }}" class="btn btn-sm btn-outline-bc">View all logs</a>
+        {% endif %}
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead><tr><th>User</th><th>Action</th><th>Description</th><th>Time</th></tr></thead>
+          <tbody>
+            {% for log in activities %}
+            <tr>
+              <td class="fw-semibold">{{ log.full_name or log.username or 'System' }}</td>
+              <td><span class="badge bg-light text-dark border">{{ log.action | replace('_', ' ') | title }}</span></td>
+              <td class="small text-muted">{{ log.description | truncate(70) }}</td>
+              <td class="small text-nowrap text-muted">{{ log.timestamp }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted py-4">No activity recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Upcoming events mini -->
+  <div class="col-xl-4">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-calendar-event me-2"></i>Upcoming Events</span>
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin_events') }}" class="btn btn-sm btn-outline-bc">Manage</a>
+        {% endif %}
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for e in events_list %}
+        <li class="list-group-item d-flex align-items-center gap-3">
+          <div class="event-date py-1 px-2">
+            <div class="day" style="font-size:1rem;">{{ e.event_date | datefmt('%d') }}</div>
+            <div class="mon">{{ e.event_date | datefmt('%b') }}</div>
+          </div>
+          <div class="small">
+            <div class="fw-semibold">{{ e.title }}</div>
+            <span class="text-muted">{{ e.start_time | timefmt if e.start_time else '' }} · {{ e.location or 'TBA' }}</span>
+          </div>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted small">No upcoming events.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var data = {{ chart_data | tojson }};
+  var palette = ['#0e6b3f', '#2563eb', '#f0a500', '#dc3545', '#8b5cf6', '#0dcaf0', '#6c757d'];
+
+  function bar(id, cfg) {
+    new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: { labels: cfg.labels, datasets: [{ data: cfg.values, backgroundColor: palette[0], borderRadius: 6, maxBarThickness: 46 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+  }
+  function doughnut(id, cfg, colors) {
+    new Chart(document.getElementById(id), {
+      type: 'doughnut',
+      data: { labels: cfg.labels, datasets: [{ data: cfg.values, backgroundColor: colors }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '58%' }
+    });
+  }
+  var genderColors = { 'Male': '#2563eb', 'Female': '#dc3545', 'Unspecified': '#6c757d' };
+  doughnut('chartGender', data.gender, data.gender.labels.map(function (l) { return genderColors[l] || '#6c757d'; }));
+  bar('chartAge', data.age);
+  bar('chartPurok', data.purok);
+  doughnut('chartDocs', data.docs, ['#ffc107', '#0dcaf0', '#2563eb', '#198754', '#dc3545']);
+  doughnut('chartComplaints', data.complaints, ['#ffc107', '#0dcaf0', '#198754', '#6c757d']);
+})();
+</script>
+{% endblock %}

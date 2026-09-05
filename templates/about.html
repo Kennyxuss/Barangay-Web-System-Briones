@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}About Barangay | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2">About Barangay {{ settings.barangay_name or '' }}</h1>
+    <p class="text-white-50 mb-0">{{ settings.municipality or '' }} · {{ settings.province or '' }}</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-body p-4">
+          <h4 class="section-title mb-3"><i class="bi bi-clock-history me-2 text-bc"></i>History</h4>
+          <p class="mb-0">{{ settings.history or 'Barangay history will be posted soon.' }}</p>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-body p-4">
+              <h5 class="fw-bold text-bc"><i class="bi bi-bullseye me-2"></i>Mission</h5>
+              <p class="small mb-0">{{ settings.mission or 'To be announced.' }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-body p-4">
+              <h5 class="fw-bold text-bc"><i class="bi bi-eye me-2"></i>Vision</h5>
+              <p class="small mb-0">{{ settings.vision or 'To be announced.' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mt-4">
+        <div class="card-body p-4">
+          <h4 class="section-title mb-3"><i class="bi bi-list-check me-2 text-bc"></i>Goals</h4>
+          {% for line in (settings.goals or '').split('\n') if line.strip() %}
+            <p class="mb-2">{{ line }}</p>
+          {% else %}
+            <p class="mb-0 text-muted">Goals will be posted soon.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-geo-alt me-2"></i>Location</div>
+        <div class="card-body small">
+          <p class="mb-2"><strong>Address:</strong><br>{{ settings.address or '—' }}</p>
+          <p class="mb-2"><strong>Municipality:</strong><br>{{ settings.municipality or '—' }}</p>
+          <p class="mb-0"><strong>Province:</strong><br>{{ settings.province or '—' }}</p>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-telephone me-2"></i>Contact Information</div>
+        <ul class="list-group list-group-flush small">
+          <li class="list-group-item"><i class="bi bi-person-badge me-2 text-bc"></i>Punong Barangay: {{ settings.captain_name or '—' }}</li>
+          <li class="list-group-item"><i class="bi bi-phone me-2 text-bc"></i>{{ settings.contact_number or '—' }}</li>
+          <li class="list-group-item"><i class="bi bi-envelope me-2 text-bc"></i>{{ settings.email or '—' }}</li>
+          <li class="list-group-item"><i class="bi bi-clock me-2 text-bc"></i>Office hours: Monday–Friday, 8:00 AM – 5:00 PM</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header"><i class="bi bi-broadcast me-2"></i>Emergency Hotlines</div>
+        <div class="card-body small">
+          {% for line in (settings.hotlines or '').split('\n') if line.strip() %}
+            <p class="mb-1 fw-semibold">{{ line }}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

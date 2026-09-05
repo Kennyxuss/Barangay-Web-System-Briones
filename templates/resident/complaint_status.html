@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Check Complaint Status | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2"><i class="bi bi-search me-2"></i>Check Complaint Status</h1>
+    <p class="text-white-50 mb-0">Enter the complaint number given when you filed your report</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      {% if request.args.get('new') and record %}
+      <div class="alert alert-success d-flex align-items-center gap-2">
+        <i class="bi bi-check-circle-fill fs-4"></i>
+        <div>
+          <strong>Your complaint has been submitted successfully!</strong><br>
+          Keep this complaint number safe: you can use it to check updates anytime.
+        </div>
+      </div>
+      {% endif %}
+
+      <form method="get" action="{{ url_for('complaint_status') }}" class="card card-body mb-4">
+        <div class="input-group input-group-lg">
+          <span class="input-group-text"><i class="bi bi-hash"></i></span>
+          <input type="text" name="q" value="{{ q }}" class="form-control text-uppercase"
+                 placeholder="e.g., CMP-2026-00001" required>
+          <button type="submit" class="btn btn-bc px-4">Track</button>
+        </div>
+      </form>
+
+      {% if record %}
+      <div class="card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <strong><i class="bi bi-megaphone me-2"></i>{{ record.complaint_number }}</strong>
+          {{ status_badge(record.status) }}
+        </div>
+        <div class="card-body p-4">
+          {% set flow = ['Pending', 'Investigating', 'Resolved'] %}
+          {% if record.status != 'Closed' %}
+          <div class="mb-4">
+            {% for step in flow %}
+              {% set idx = loop.index0 %}
+              {% set cur = flow.index(record.status) if record.status in flow else 2 %}
+            <div class="timeline-step {{ 'done' if idx <= cur }}">
+              <div class="dot">{{ '✓' if idx <= cur else idx + 1 }}</div>
+              <div>
+                <div class="fw-semibold small">{{ step }}</div>
+                <small class="text-muted opacity-75">
+                  {% if step == 'Pending' %}Awaiting assignment
+                  {% elif step == 'Investigating' %}Being looked into by barangay personnel
+                  {% else %}Action completed{% endif %}
+                </small>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="alert alert-secondary"><i class="bi bi-archive me-2"></i>This case has been closed.</div>
+          {% endif %}
+
+          <dl class="row mb-0">
+            <dt class="col-sm-4 small text-muted fw-normal">Complaint Number</dt><dd class="col-sm-8 fw-bold">{{ record.complaint_number }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Status</dt><dd class="col-sm-8">{{ status_badge(record.status) }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Date Reported</dt><dd class="col-sm-8">{{ record.date_reported | datefmt }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Subject</dt><dd class="col-sm-8">{{ record.subject }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Location</dt><dd class="col-sm-8">{{ record.location or '—' }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Description</dt>
+            <dd class="col-sm-8" style="white-space:pre-line;">{{ record.description }}</dd>
+            {% if record.assigned_to %}
+            <dt class="col-sm-4 small text-muted fw-normal">Assigned To</dt><dd class="col-sm-8">{{ record.assigned_to }}</dd>
+            {% endif %}
+            {% if record.remarks %}
+            <dt class="col-sm-4 small text-muted fw-normal">Remarks</dt><dd class="col-sm-8">{{ record.remarks }}</dd>
+            {% endif %}
+          </dl>
+        </div>
+        <div class="card-footer bg-white small text-muted">
+          Questions? Call {{ settings.contact_number or 'the barangay hotline' }}.
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

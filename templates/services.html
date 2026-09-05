@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Services | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2">Barangay Services</h1>
+    <p class="text-white-50 mb-0">Frontline services offered by the Barangay Hall</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row g-4 mb-5">
+    {% for title, icon, desc in services_info %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 event-card">
+        <div class="card-body p-4">
+          <div class="mb-3" style="width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--bc-primary-light);color:var(--bc-primary);font-size:1.4rem;">
+            <i class="bi {{ icon }}"></i>
+          </div>
+          <h5 class="fw-bold">{{ title }}</h5>
+          <p class="small text-muted mb-3">{{ desc }}</p>
+          <a href="{{ url_for('request_document') }}" class="btn btn-outline-bc btn-sm">
+            <i class="bi bi-file-earmark-plus me-1"></i>Request online
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="card-header"><i class="bi bi-info-circle me-2"></i>Reminders</div>
+    <ul class="list-group list-group-flush small">
+      <li class="list-group-item">Bring a valid government-issued ID when claiming documents.</li>
+      <li class="list-group-item">Processing time is typically 1–3 working days depending on the document type.</li>
+      <li class="list-group-item">Requests submitted online are processed in the order they are received.</li>
+      <li class="list-group-item">Track your request anytime using your request number on the
+        <a href="{{ url_for('request_status') }}">status checker</a>.</li>
+      <li class="list-group-item">For business clearances, bring your DTI/SEC registration and a sketch of the business location.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

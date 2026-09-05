@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}File a Complaint | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2"><i class="bi bi-megaphone me-2"></i>File a Complaint</h1>
+    <p class="text-white-50 mb-0">Report community concerns — the barangay will act on them</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      {% if form %}
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>Please review the highlighted errors below and resubmit.
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <div class="card-header py-3"><i class="bi bi-pencil-square me-2"></i>Complaint Form</div>
+        <div class="card-body p-4">
+          <form method="post" action="{{ url_for('complaint_file') }}" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                <input type="text" name="complainant_name" class="form-control" required maxlength="100"
+                       value="{{ form.complainant_name or '' }}" placeholder="Juan Dela Cruz">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Contact Number <span class="text-danger">*</span></label>
+                <input type="tel" name="contact_number" class="form-control" required maxlength="20"
+                       value="{{ form.contact_number or '' }}" placeholder="0917-000-0000">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email Address</label>
+                <input type="email" name="email" class="form-control" maxlength="120"
+                       value="{{ form.email or '' }}" placeholder="you@example.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Location of Incident</label>
+                <input type="text" name="location" class="form-control" maxlength="150"
+                       value="{{ form.location or '' }}" placeholder="e.g., Purok 3, near the chapel">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+                <input type="text" name="subject" class="form-control" required maxlength="150"
+                       value="{{ form.subject or '' }}" placeholder="Brief summary of your complaint">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Complaint Description <span class="text-danger">*</span></label>
+                <textarea name="description" class="form-control" rows="5" required maxlength="2000"
+                          placeholder="Describe what happened, when, and who is involved...">{{ form.description or '' }}</textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-bc btn-lg mt-4 px-5">
+              <i class="bi bi-send me-2"></i>Submit Complaint
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="alert alert-danger mt-4 small mb-0">
+        <i class="bi bi-exclamation-octagon-fill me-1"></i><strong>For emergencies</strong> (crimes in progress,
+        fire, medical emergencies), call <strong>911</strong> or the hotline numbers on our
+        <a href="{{ url_for('contact') }}">contact page</a> instead. This form is for non-emergency reports.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

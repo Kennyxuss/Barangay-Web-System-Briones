@@ -1,0 +1,137 @@
+{% extends 'admin/base_admin.html' %}
+{% from 'macros.html' import sort_header, pagination %}
+{% block page_title %}Residents{% endblock %}
+{% block page_subtitle %}Manage barangay resident records ({{ total }} total){% endblock %}
+
+{% block admin_content %}
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Search</label>
+        <input type="text" name="search" value="{{ search }}" class="form-control"
+               placeholder="Name, resident ID, purok, contact...">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-semibold">Sex</label>
+        <select name="sex" class="form-select">
+          <option value="">All</option>
+          <option value="Male" {{ 'selected' if sex == 'Male' }}>Male</option>
+          <option value="Female" {{ 'selected' if sex == 'Female' }}>Female</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-semibold">Purok</label>
+        <select name="purok" class="form-select">
+          <option value="">All</option>
+          {% for pk in puroks %}<option value="{{ pk }}" {{ 'selected' if purok == pk }}>{{ pk }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-semibold">Voter Status</label>
+        <select name="voter_status" class="form-select">
+          <option value="">All</option>
+          <option value="Registered" {{ 'selected' if voter == 'Registered' }}>Registered</option>
+          <option value="Not Registered" {{ 'selected' if voter == 'Not Registered' }}>Not Registered</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label small fw-semibold">Residency</label>
+        <select name="residency_status" class="form-select">
+          <option value="">All</option>
+          {% for r in ['Permanent', 'Renting', 'Transient'] %}
+          <option value="{{ r }}" {{ 'selected' if residency == r }}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 d-flex gap-2 mt-2">
+        <button class="btn btn-bc btn-sm px-3"><i class="bi bi-funnel me-1"></i>Apply Filters</button>
+        <a href="{{ url_for('admin_residents') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+        <a href="{{ url_for('admin_export', which='residents') }}" class="btn btn-outline-secondary btn-sm ms-auto">
+          <i class="bi bi-filetype-csv me-1"></i>Export CSV
+        </a>
+        <a href="{{ url_for('admin_resident_add') }}" class="btn btn-bc btn-sm">
+          <i class="bi bi-plus-lg me-1"></i>Add Resident
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>{{ sort_header('admin_residents', 'Resident ID', 'resident_id', sort, direction) }}</th>
+          <th>{{ sort_header('admin_residents', 'Full Name', 'last_name', sort, direction) }}</th>
+          <th>{{ sort_header('admin_residents', 'Sex', 'sex', sort, direction) }}</th>
+          <th>{{ sort_header('admin_residents', 'Birth Date', 'birth_date', sort, direction) }}</th>
+          <th>Age</th>
+          <th>Purok</th>
+          <th>Contact</th>
+          <th>Voter</th>
+          <th class="text-end no-print">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in residents %}
+        <tr>
+          <td>
+            {% if r.photo %}
+            <img src="{{ url_for('static', filename='uploads/' ~ r.photo) }}" class="avatar-sm" style="object-fit:cover;" alt="">
+            {% else %}
+            <img src="{{ url_for('static', filename='images/avatar.svg') }}" class="avatar-sm" alt="">
+            {% endif %}
+          </td>
+          <td class="fw-semibold text-nowrap">{{ r.resident_id }}</td>
+          <td>
+            <span class="fw-semibold">{{ r.last_name }}, {{ r.first_name }} {{ r.middle_name or '' }} {{ r.suffix or '' }}</span>
+            {% if r.residency_status %}<br><small class="text-muted">{{ r.residency_status }}</small>{% endif %}
+          </td>
+          <td>{{ r.sex }}</td>
+          <td class="text-nowrap">{{ r.birth_date | datefmt('%b %d, %Y') }}</td>
+          <td>{{ r.birth_date | age or '—' }}</td>
+          <td>{{ r.purok or '—' }}</td>
+          <td class="text-nowrap">{{ r.contact_number or '—' }}</td>
+          <td>
+            {% if r.voter_status == 'Registered' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle">Registered</span>
+            {% else %}
+              <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ r.voter_status or 'N/A' }}</span>
+            {% endif %}
+          </td>
+          <td class="text-end no-print text-nowrap">
+            <a href="{{ url_for('admin_resident_view', resident_pk=r.id) }}"
+               class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+            <a href="{{ url_for('admin_resident_edit', resident_pk=r.id) }}"
+               class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin_create_resident_account', resident_pk=r.id) }}"
+               class="btn btn-sm btn-outline-success" title="Create Account"><i class="bi bi-person-plus"></i></a>
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_resident_delete', resident_pk=r.id) }}"
+                    data-confirm-title="Delete resident?"
+                    data-confirm-text="Permanently delete {{ r.first_name }} {{ r.last_name }} ({{ r.resident_id }})? This cannot be undone.">
+              <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10" class="text-center text-muted py-5">
+          <i class="bi bi-people fs-1 d-block mb-2 opacity-25"></i>
+          No residents found{% if search or sex or purok %} matching your filters{% endif %}.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <small class="text-muted">Showing {{ residents | length }} of {{ total }} record(s)</small>
+    {{ pagination(page, total_pages) }}
+  </div>
+</div>
+{% endblock %}

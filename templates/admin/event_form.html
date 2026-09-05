@@ -1,0 +1,96 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Event information{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-calendar-event me-2"></i>Event Details</div>
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data"
+              action="{{ url_for('admin_event_edit', event_id=item.id) if item else url_for('admin_event_add') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Title <span class="text-danger">*</span></label>
+              <input type="text" name="title" class="form-control" required maxlength="150"
+                     value="{{ item.title or '' }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Event Date <span class="text-danger">*</span></label>
+              <input type="date" name="event_date" class="form-control" required
+                     value="{{ item.event_date or '' }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Status</label>
+              <select name="status" class="form-select">
+                {% for st in ['Scheduled', 'Ongoing', 'Completed', 'Cancelled'] %}
+                <option value="{{ st }}" {{ 'selected' if (item and item.status == st) or (not item and st == 'Scheduled') }}>{{ st }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Start Time</label>
+              <input type="time" name="start_time" class="form-control" value="{{ item.start_time or '' }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">End Time</label>
+              <input type="time" name="end_time" class="form-control" value="{{ item.end_time or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Location</label>
+              <input type="text" name="location" class="form-control" maxlength="150"
+                     value="{{ item.location or '' }}" placeholder="e.g., Barangay Covered Court">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Organizer</label>
+              <input type="text" name="organizer" class="form-control" maxlength="120"
+                     value="{{ item.organizer or '' }}">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea name="description" class="form-control" rows="5">{{ item.description or '' }}</textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Event Image</label>
+              <input type="file" name="image" accept=".png,.jpg,.jpeg,.webp,.gif" class="form-control">
+              <div class="form-text">PNG, JPG, WEBP, GIF — max 5 MB.</div>
+              {% if item and item.image %}
+              <img src="{{ url_for('static', filename='uploads/' ~ item.image) }}" alt="" class="mt-2 rounded" style="max-height:160px;object-fit:cover;">
+              <div class="form-check mt-1">
+                <input type="checkbox" name="remove_image" value="1" id="rmEventImg" class="form-check-input">
+                <label for="rmEventImg" class="form-check-label small">Remove existing image</label>
+              </div>
+              {% endif %}
+              <div class="mt-2">
+                <img id="eventPreview" src="" alt="" class="rounded d-none" style="max-height:160px;object-fit:cover;">
+              </div>
+            </div>
+          </div>
+          <script>
+            (function(){
+              var inp = document.querySelector('input[name="image"]');
+              var prev = document.getElementById('eventPreview');
+              if(inp && prev){
+                inp.addEventListener('change', function(){
+                  if(this.files && this.files[0]){
+                    prev.src = URL.createObjectURL(this.files[0]);
+                    prev.classList.remove('d-none');
+                  } else {
+                    prev.src=''; prev.classList.add('d-none');
+                  }
+                });
+              }
+            })();
+          </script>
+          <div class="d-flex gap-2 mt-4 pt-2 border-top">
+            <button type="submit" class="btn btn-bc px-4"><i class="bi bi-check-lg me-1"></i>Save</button>
+            <a href="{{ url_for('admin_events') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

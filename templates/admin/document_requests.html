@@ -1,0 +1,118 @@
+{% extends 'admin/base_admin.html' %}
+{% from 'macros.html' import pagination %}
+{% block page_title %}Document Requests{% endblock %}
+{% block page_subtitle %}Process certificate and clearance requests{% endblock %}
+
+{% block admin_content %}
+<!-- Status tabs -->
+<ul class="nav nav-pills mb-3 flex-wrap gap-1">
+  <li class="nav-item"><a class="nav-link {{ 'active' if not status }}" href="{{ url_for('admin_documents') }}">All</a></li>
+  {% for st in ['Pending', 'Processing', 'Approved', 'Released', 'Rejected'] %}
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if status == st }}" href="{{ url_for('admin_documents', status=st) }}">
+      {{ st }} <span class="badge bg-dark-subtle text-dark ms-1">{{ counts.get(st, 0) }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+
+<div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+  <form method="get" class="search-input-group d-flex gap-2 w-auto">
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+    <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm"
+           placeholder="Search number, name, type...">
+    <button class="btn btn-sm btn-outline-secondary">Go</button>
+  </form>
+  <a href="{{ url_for('admin_export', which='documents') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-filetype-csv me-1"></i>Export CSV
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr><th>Request No.</th><th>Requester</th><th>Document</th><th>Purpose</th><th>Date</th><th>Status</th><th>Processed By</th><th class="text-end no-print">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for r in requests %}
+        <tr data-bs-toggle="collapse" data-bs-target="#reqRow{{ r.id }}" role="button" aria-expanded="false"
+            title="Click to view details">
+          <td class="fw-semibold text-nowrap">{{ r.request_number }}</td>
+          <td>{{ r.requester_name }}</td>
+          <td><span class="badge bg-light text-dark border">{{ r.document_type }}</span></td>
+          <td class="small text-muted">{{ (r.purpose or '') | truncate(40) }}</td>
+          <td class="text-nowrap">{{ r.request_date | datefmt('%b %d, %Y') }}</td>
+          <td>{{ status_badge(r.status) }}</td>
+          <td class="small">{{ r.processor or '—' }}</td>
+          <td class="text-end no-print" onclick="event.stopPropagation()">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#updateModal{{ r.id }}" title="Update"><i class="bi bi-arrow-repeat"></i></button>
+            {% if current_user.role == 'admin' %}
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_document_delete', request_id=r.id) }}"
+                    data-confirm-title="Delete request?"
+                    data-confirm-text="Delete document request {{ r.request_number }}? This cannot be undone.">
+              <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        <tr class="collapse" id="reqRow{{ r.id }}">
+          <td colspan="8" class="bg-light">
+            <div class="row g-3 p-2 small">
+              <div class="col-md-3"><strong>Contact:</strong> {{ r.contact_number or '—' }}</div>
+              <div class="col-md-4"><strong>Email:</strong> {{ r.email or '—' }}</div>
+              <div class="col-md-5"><strong>Address:</strong> {{ r.address or '—' }}</div>
+              <div class="col-md-6"><strong>Purpose:</strong> {{ r.purpose or '—' }}</div>
+              <div class="col-md-6"><strong>Additional info:</strong> {{ r.additional_info or '—' }}</div>
+              <div class="col-md-6"><strong>Remarks:</strong> {{ r.remarks or '—' }}</div>
+              <div class="col-md-6"><strong>Release date:</strong> {{ r.release_date | datefmt if r.release_date else '—' }}</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Update modal -->
+        <div class="modal fade" id="updateModal{{ r.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form method="post" action="{{ url_for('admin_document_update', request_id=r.id) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header">
+                  <h5 class="modal-title">Update Request {{ r.request_number }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <p class="small text-muted mb-3">{{ r.document_type }} — requested by
+                    {{ r.requester_name }} on {{ r.request_date | datefmt }}</p>
+                  <label class="form-label fw-semibold">Status</label>
+                  <select name="status" class="form-select mb-3">
+                    {% for st in ['Pending', 'Processing', 'Approved', 'Released', 'Rejected'] %}
+                    <option value="{{ st }}" {{ 'selected' if r.status == st }}>{{ st }}</option>
+                    {% endfor %}
+                  </select>
+                  <label class="form-label fw-semibold">Remarks</label>
+                  <textarea name="remarks" class="form-control" rows="2"
+                            placeholder="Optional notes visible to admins...">{{ r.remarks or '' }}</textarea>
+                  <p class="small text-muted mt-2 mb-0"><i class="bi bi-info-circle me-1"></i>
+                    Setting to <em>Released</em> records today as the release date.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-bc">Save Update</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-5">
+          No document requests found{% if status or q %} with the current filters{% endif %}.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
