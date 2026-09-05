@@ -1,0 +1,66 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Blotter Records{% endblock %}
+{% block page_subtitle %}Official police blotter of the barangay{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <form method="get" class="search-input-group d-flex gap-2 w-auto">
+    <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm"
+           placeholder="Search number, parties, type...">
+    <select name="status" class="form-select form-select-sm w-auto">
+      <option value="">All statuses</option>
+      {% for st in ['Open', 'Under Investigation', 'Settled', 'Closed'] %}
+      <option value="{{ st }}" {{ 'selected' if status == st }}>{{ st }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-sm btn-outline-secondary">Go</button>
+  </form>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin_export', which='blotter') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-filetype-csv me-1"></i>Export CSV
+    </a>
+    <a href="{{ url_for('admin_blotter_add') }}" class="btn btn-bc"><i class="bi bi-plus-lg me-1"></i>New Entry</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Blotter No.</th><th>Complainant</th><th>Respondent</th><th>Type</th><th>Date</th><th>Status</th><th>Recorded By</th><th class="text-end no-print">Actions</th></tr></thead>
+      <tbody>
+        {% for b in records %}
+        <tr data-bs-toggle="collapse" data-bs-target="#bltRow{{ b.id }}" role="button">
+          <td class="fw-semibold text-nowrap">{{ b.blotter_number }}</td>
+          <td>{{ b.complainant }}</td>
+          <td>{{ b.respondent or '—' }}</td>
+          <td><span class="badge bg-light text-dark border">{{ b.incident_type }}</span></td>
+          <td class="text-nowrap small">{{ b.incident_date | datefmt('%b %d, %Y') }}</td>
+          <td>{{ status_badge(b.status) }}</td>
+          <td class="small">{{ b.recorder or '—' }}</td>
+          <td class="text-end no-print text-nowrap" onclick="event.stopPropagation()">
+            <a href="{{ url_for('admin_blotter_edit', entry_id=b.id) }}" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_blotter_delete', entry_id=b.id) }}"
+                    data-confirm-title="Delete blotter entry?"
+                    data-confirm-text="Delete blotter record {{ b.blotter_number }}? This cannot be undone.">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr class="collapse" id="bltRow{{ b.id }}">
+          <td colspan="8" class="bg-light p-3 small">
+            <p class="mb-1"><strong>Location:</strong> {{ b.incident_location or '—' }}</p>
+            <p class="mb-1"><strong>Description:</strong></p>
+            <p style="white-space:pre-line;">{{ b.description or '—' }}</p>
+            <p class="mb-0"><strong>Action taken:</strong> {{ b.action_taken or '—' }}</p>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-5">No blotter records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

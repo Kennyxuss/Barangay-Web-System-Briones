@@ -1,0 +1,67 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Announcement details{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-megaphone me-2"></i>Announcement</div>
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data"
+              action="{{ url_for('admin_announcement_edit', announcement_id=item.id) if item else url_for('admin_announcement_add') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-3">
+            <label class="form-label">Title <span class="text-danger">*</span></label>
+            <input type="text" name="title" class="form-control" required maxlength="150"
+                   value="{{ item.title or '' }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Content <span class="text-danger">*</span></label>
+            <textarea name="content" class="form-control" rows="8" required>{{ item.content or '' }}</textarea>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Image</label>
+              <input type="file" name="image" accept=".png,.jpg,.jpeg,.webp,.gif" class="form-control" id="annImage">
+              {% if item and item.image %}
+              <img src="{{ url_for('static', filename='uploads/' ~ item.image) }}" alt=""
+                   class="mt-2 rounded" style="max-height:120px;">
+              <div class="form-check mt-1">
+                <input type="checkbox" name="remove_image" value="1" id="rmImg" class="form-check-input">
+                <label for="rmImg" class="form-check-label small">Remove existing image</label>
+              </div>
+              {% endif %}
+              <div class="mt-2">
+                <img id="annPreview" src="" alt="" class="rounded d-none" style="max-height:120px;object-fit:cover;">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <select name="status" class="form-select">
+                <option value="Published" {{ 'selected' if not item or item.status == 'Published' }}>Published</option>
+                <option value="Unpublished" {{ 'selected' if item and item.status == 'Unpublished' }}>Unpublished</option>
+              </select>
+              <div class="form-text">Only published announcements appear on the public site.</div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4 pt-2 border-top">
+            <button type="submit" class="btn btn-bc px-4"><i class="bi bi-check-lg me-1"></i>Save</button>
+            <a href="{{ url_for('admin_announcements') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+          <script>
+            (function(){
+              var inp=document.getElementById('annImage');
+              var prev=document.getElementById('annPreview');
+              if(inp&&prev){inp.addEventListener('change',function(){
+                if(this.files&&this.files[0]){prev.src=URL.createObjectURL(this.files[0]);prev.classList.remove('d-none');}
+                else{prev.src='';prev.classList.add('d-none');}
+              });}
+            })();
+          </script>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

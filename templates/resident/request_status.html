@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Check Request Status | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2"><i class="bi bi-search me-2"></i>Check Request Status</h1>
+    <p class="text-white-50 mb-0">Enter the request number given when you submitted your request</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      {% if request.args.get('new') and record %}
+      <div class="alert alert-success d-flex align-items-center gap-2">
+        <i class="bi bi-check-circle-fill fs-4"></i>
+        <div>
+          <strong>Your request has been successfully submitted!</strong><br>
+          Keep this request number safe: you will use it to track your request.
+        </div>
+      </div>
+      {% endif %}
+
+      <form method="get" action="{{ url_for('request_status') }}" class="card card-body mb-4">
+        <div class="input-group input-group-lg">
+          <span class="input-group-text"><i class="bi bi-hash"></i></span>
+          <input type="text" name="q" value="{{ q }}" class="form-control text-uppercase"
+                 placeholder="e.g., REQ-2026-00001" required>
+          <button type="submit" class="btn btn-bc px-4">Track</button>
+        </div>
+      </form>
+
+      {% if record %}
+      <div class="card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <strong><i class="bi bi-file-earmark-text me-2"></i>{{ record.request_number }}</strong>
+          {{ status_badge(record.status) }}
+        </div>
+        <div class="card-body p-4">
+          <!-- Progress steps -->
+          {% set flow = ['Pending', 'Processing', 'Approved', 'Released'] %}
+          {% if record.status == 'Rejected' %}
+            <div class="alert alert-danger">
+              <i class="bi bi-x-circle-fill me-2"></i>This request was <strong>rejected</strong>.
+              {% if record.remarks %}<br><small>Reason: {{ record.remarks }}</small>{% endif %}
+              Please contact the Barangay Hall for details or file a new request.
+            </div>
+          {% else %}
+          <div class="mb-4">
+            {% for step in flow %}
+              {% set idx = flow.index(step) %}
+              {% set cur = flow.index(record.status) if record.status in flow else 3 %}
+            <div class="timeline-step {{ 'done' if idx <= cur }}">
+              <div class="dot">{{ '✓' if idx <= cur else idx + 1 }}</div>
+              <div>
+                <div class="fw-semibold small">{{ step }}</div>
+                <small class="text-muted opacity-75">
+                  {% if step == 'Pending' %}Awaiting review
+                  {% elif step == 'Processing' %}Being prepared
+                  {% elif step == 'Approved' %}Ready for release/signature
+                  {% else %}Claim at the Barangay Hall{% endif %}
+                </small>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <dl class="row mb-0">
+            <dt class="col-sm-4 small text-muted fw-normal">Request Number</dt><dd class="col-sm-8 fw-bold">{{ record.request_number }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Status</dt><dd class="col-sm-8">{{ status_badge(record.status) }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Document Type</dt><dd class="col-sm-8">{{ record.document_type }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Date Requested</dt><dd class="col-sm-8">{{ record.request_date | datefmt }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Requester</dt><dd class="col-sm-8">{{ record.requester_name }}</dd>
+            <dt class="col-sm-4 small text-muted fw-normal">Purpose</dt><dd class="col-sm-8">{{ record.purpose or '—' }}</dd>
+            {% if record.release_date %}
+            <dt class="col-sm-4 small text-muted fw-normal">Release Date</dt><dd class="col-sm-8">{{ record.release_date | datefmt }}</dd>
+            {% endif %}
+            {% if record.processor %}
+            <dt class="col-sm-4 small text-muted fw-normal">Processed By</dt><dd class="col-sm-8">{{ record.processor }}</dd>
+            {% endif %}
+            {% if record.remarks and record.status != 'Rejected' %}
+            <dt class="col-sm-4 small text-muted fw-normal">Remarks</dt><dd class="col-sm-8">{{ record.remarks }}</dd>
+            {% endif %}
+          </dl>
+
+          {% if record.status == 'Approved' %}
+          <div class="alert alert-success mt-3 mb-0 small">
+            <i class="bi bi-check-circle me-1"></i>Your document is ready! Please claim it at
+            {{ settings.address or 'the Barangay Hall' }} and bring a valid ID. Office hours:
+            Monday–Friday, 8:00 AM – 5:00 PM.
+          </div>
+          {% endif %}
+        </div>
+        <div class="card-footer bg-white small text-muted">
+          Questions? Call {{ settings.contact_number or 'the barangay hotline' }} or
+          <a href="{{ url_for('contact') }}">send us an inquiry</a>.
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

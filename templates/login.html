@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Login | BarangayConnect{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="login-page py-5">
+  <div class="container">
+    <div class="login-card card mx-auto shadow-lg">
+      <div class="row g-0">
+        <div class="col-lg-5 login-side d-none d-lg-flex">
+          <div>
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" width="64" height="64"
+                 class="mb-3 rounded-circle bg-white p-1" alt="Seal">
+            <h3 class="fw-bold">{{ system_name }}</h3>
+            <p class="opacity-75">{{ tagline }}</p>
+            <hr class="border-light opacity-25 w-25">
+          </div>
+          <p class="small opacity-75 mb-0">
+            <i class="bi bi-shield-lock me-2"></i>Authorized personnel only.
+            All activities on this system are logged.
+          </p>
+        </div>
+        <div class="col-lg-7">
+          <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4 d-lg-none">
+              <img src="{{ url_for('static', filename='images/logo.svg') }}" width="56" height="56" alt="">
+              <h4 class="fw-bold mt-2 mb-0">BarangayConnect</h4>
+            </div>
+            <h4 class="fw-bold">Welcome back!</h4>
+            <p class="text-muted small">Sign in to access the management dashboard.</p>
+
+            <form method="post" action="{{ url_for('login') }}">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Username</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person"></i></span>
+                  <input type="text" name="username" class="form-control" required autofocus
+                         autocomplete="username" placeholder="Enter your username">
+                </div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label fw-semibold">Password</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-key"></i></span>
+                  <input type="password" name="password" id="loginPassword" class="form-control" required
+                         autocomplete="current-password" placeholder="Enter your password">
+                  <button class="btn btn-outline-secondary" type="button" tabindex="-1"
+                          onclick="const el=document.getElementById('loginPassword');el.type=el.type==='password'?'text':'password';">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-bc w-100 py-2 fw-semibold">
+                <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+              </button>
+            </form>
+
+            <div class="alert alert-warning small mt-4 mb-0 py-2">
+              <i class="bi bi-exclamation-triangle me-1"></i><strong>First-time setup:</strong>
+              default admin credentials are <code>admin / admin123</code>. Change the password immediately after login
+              (Dashboard &rarr; Users).
+            </div>
+            <div class="text-center small mt-3">
+              <span class="text-muted">Are you a resident?</span> <a href="{{ url_for('register') }}" class="fw-semibold text-decoration-none">Create an account</a>
+            </div>
+            <a href="{{ url_for('home') }}" class="d-block text-center small mt-2 text-decoration-none">
+              <i class="bi bi-arrow-left"></i> Back to public website
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Request Document | {{ system_name }}{% endblock %}
+{% block content %}
+<section class="hero-section py-4">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-plus me-2"></i>Request a Document</h2>
+    <p class="text-white-50 mb-0">Logged in as {{ resident.first_name }} {{ resident.last_name }} — {{ resident.resident_id }}</p>
+  </div>
+</section>
+<div class="container py-4">
+  <ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_dashboard') }}">Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_my_documents') }}">My Documents</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('resident_request_document') }}">New Request</a></li>
+  </ul>
+
+  <div class="card">
+    <div class="card-header"><i class="bi bi-journal-check me-2"></i>Document Request — auto-filled from your profile</div>
+    <div class="card-body p-4">
+      <div class="alert alert-light small">
+        <strong>Requester:</strong> {{ resident.first_name }} {{ resident.last_name }} &nbsp;|&nbsp; <strong>Address:</strong> {{ resident.address }} &nbsp;|&nbsp; <strong>Contact:</strong> {{ resident.contact_number or '—' }}
+      </div>
+      <form method="post" action="{{ url_for('resident_request_document') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Document Type <span class="text-danger">*</span></label>
+            <select name="document_type" class="form-select" required>
+              <option value="" disabled {{ 'selected' if not form.document_type }}>Select document...</option>
+              {% for dt in document_types %}
+              <option value="{{ dt }}" {{ 'selected' if form.document_type==dt }}>{{ dt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Purpose <span class="text-danger">*</span></label>
+            <input type="text" name="purpose" class="form-control" required maxlength="150" value="{{ form.purpose or '' }}" placeholder="e.g., Employment, Scholarship">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Additional Information</label>
+            <textarea name="additional_info" class="form-control" rows="3" maxlength="500" placeholder="Optional">{{ form.additional_info or '' }}</textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-bc btn-lg mt-4 px-5"><i class="bi bi-send me-2"></i>Submit Request</button>
+        <a href="{{ url_for('resident_my_documents') }}" class="btn btn-outline-secondary btn-lg mt-4 ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

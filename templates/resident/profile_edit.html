@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile | {{ system_name }}{% endblock %}
+{% block content %}
+<section class="hero-section py-4">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-pencil-square me-2"></i>Edit My Profile</h2>
+    <p class="text-white-50 mb-0">Update your contact and address information</p>
+  </div>
+</section>
+<div class="container py-4">
+  <ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_dashboard') }}">Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('resident_profile') }}">My Profile</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_my_documents') }}">My Documents</a></li>
+  </ul>
+  <div class="card">
+    <div class="card-body p-4">
+      <form method="post" action="{{ url_for('resident_profile_edit') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Contact Number</label>
+            <input type="tel" name="contact_number" class="form-control" maxlength="20" value="{{ resident.contact_number or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" maxlength="120" value="{{ resident.email or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Purok <span class="text-danger">*</span></label>
+            <input type="text" name="purok" class="form-control" required maxlength="50" value="{{ resident.purok or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Civil Status</label>
+            <select name="civil_status" class="form-select">
+              <option value="">Select</option>
+              {% for s in ['Single','Married','Widowed','Separated'] %}
+              <option value="{{ s }}" {{ 'selected' if resident.civil_status==s }}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Address <span class="text-danger">*</span></label>
+            <input type="text" name="address" class="form-control" required maxlength="200" value="{{ resident.address or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Occupation</label>
+            <input type="text" name="occupation" class="form-control" maxlength="80" value="{{ resident.occupation or '' }}">
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-bc px-4"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
+          <a href="{{ url_for('resident_profile') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% from 'macros.html' import flash_messages %}
+<nav class="navbar navbar-expand-xl public-navbar sticky-top" data-bs-theme="dark">
+  <div class="container-fluid px-3 px-xl-4" style="max-width: 1440px; margin: 0 auto;">
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center gap-2 gap-xl-3 py-1 flex-shrink-0" href="{{ url_for('home') }}">
+      <span class="brand-logo-wrap">
+        {% if settings.logo %}
+        <img src="{{ url_for('static', filename='uploads/' ~ settings.logo) }}" alt="Barangay seal" width="38" height="38" class="brand-logo-img">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Barangay seal" width="38" height="38" class="brand-logo-img">
+        {% endif %}
+      </span>
+      <span class="lh-sm brand-text">
+        <strong class="brand-title">Barangay {{ settings.barangay_name or 'Wao' }}</strong>
+        <small class="brand-subtitle d-block">Barangay Management and Information System</small>
+      </span>
+    </a>
+
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#publicNav"
+            aria-controls="publicNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-xl-between" id="publicNav">
+      <!-- Center links -->
+      {% set p = request.path %}
+      <ul class="navbar-nav mx-xl-auto align-items-xl-center gap-xl-1 text-uppercase nav-main-links">
+        <li class="nav-item"><a class="nav-link {{ 'active' if p == '/' }}" href="{{ url_for('home') }}">Home</a></li>
+        <li class="nav-item"><a class="nav-link text-nowrap {{ 'active' if p == '/about' }}" href="{{ url_for('about') }}">About Barangay</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if p == '/officials' }}" href="{{ url_for('public_officials') }}">Officials</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if p.startswith('/announcements') }}" href="{{ url_for('public_announcements') }}">Announcements</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if p == '/events' }}" href="{{ url_for('public_events') }}">Events</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if p == '/services' }}" href="{{ url_for('services') }}">Services</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-nowrap {{ 'active' if p in ['/request-document','/request-status','/complaint','/complaint-status'] }}"
+             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Resident Services</a>
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
+            <li><a class="dropdown-item" href="{{ url_for('request_document') }}"><i class="bi bi-file-earmark-text me-2 text-success"></i>Request a Document</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('request_status') }}"><i class="bi bi-search me-2 text-primary"></i>Check Document Request</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('complaint_file') }}"><i class="bi bi-megaphone me-2 text-warning"></i>File a Complaint</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('complaint_status') }}"><i class="bi bi-inbox me-2 text-info"></i>Check Complaint Status</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if p == '/contact' }}" href="{{ url_for('contact') }}">Contact</a></li>
+      </ul>
+
+      <!-- Auth buttons - separated from nav links for clean alignment -->
+      <div class="nav-auth d-flex align-items-center gap-2 ms-xl-3 ps-xl-3 nav-auth-divider mt-3 mt-xl-0 flex-shrink-0">
+        {% if current_user %}
+          {% if current_user.role == 'resident' %}
+          <a class="btn btn-login rounded-pill px-3 fw-bold" href="{{ url_for('resident_dashboard') }}">
+            <i class="bi bi-person-circle me-1"></i> My Dashboard
+          </a>
+          {% else %}
+          <a class="btn btn-login rounded-pill px-3 fw-bold" href="{{ url_for('admin_dashboard') }}">
+            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+          </a>
+          {% endif %}
+        {% else %}
+          <a class="btn btn-login rounded-pill px-3 fw-bold" href="{{ url_for('login') }}">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+          </a>
+          <a class="btn btn-register rounded-pill px-3 fw-semibold" href="{{ url_for('register') }}">
+            <i class="bi bi-person me-1"></i> Register
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>

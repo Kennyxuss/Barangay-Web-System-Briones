@@ -1,0 +1,89 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Resident Profile{% endblock %}
+{% block page_subtitle %}{{ resident.resident_id }}{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+  <div class="col-xl-10">
+    <div class="card mb-4">
+      <div class="card-body p-4" id="residentProfile">
+        <div class="d-flex flex-column flex-md-row align-items-center gap-4 pb-3 border-bottom no-print">
+          {% if resident.photo %}
+          <img src="{{ url_for('static', filename='uploads/' ~ resident.photo) }}" class="avatar-lg" style="object-fit:cover;" alt="Resident photo">
+          {% else %}
+          <img src="{{ url_for('static', filename='images/avatar.svg') }}" class="avatar-lg" alt="Resident photo">
+          {% endif %}
+          <div class="text-center text-md-start flex-grow-1">
+            <h4 class="fw-bold mb-1">{{ resident.first_name }} {{ resident.middle_name or '' }} {{ resident.last_name }} {{ resident.suffix or '' }}</h4>
+            <span class="badge bg-bc">{{ resident.resident_id }}</span>
+          </div>
+          <div class="d-flex gap-2 flex-wrap justify-content-center no-print">
+            <button class="btn btn-outline-secondary btn-sm" data-print><i class="bi bi-printer me-1"></i>Print Profile</button>
+            <a href="{{ url_for('admin_resident_edit', resident_pk=resident.id) }}" class="btn btn-warning btn-sm">
+              <i class="bi bi-pencil me-1"></i>Edit
+            </a>
+            {% if current_user.role == 'admin' %}
+            <button type="button" class="btn btn-danger btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_resident_delete', resident_pk=resident.id) }}"
+                    data-confirm-title="Delete resident?"
+                    data-confirm-text="Permanently delete this resident record? This cannot be undone.">
+              <i class="bi bi-trash me-1"></i>Delete
+            </button>
+            {% endif %}
+          </div>
+        </div>
+
+        <dl class="row mb-0 mt-3">
+          <dt class="col-sm-4 small text-muted fw-normal">Resident ID</dt><dd class="col-sm-8">{{ resident.resident_id }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Full Name</dt>
+          <dd class="col-sm-8">{{ resident.first_name }} {{ resident.middle_name or '' }} {{ resident.last_name }} {{ resident.suffix or '' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Birth Date</dt>
+          <dd class="col-sm-8">{{ resident.birth_date | datefmt }} (Age: {{ resident.birth_date | age or '—' }})</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Place of Birth</dt><dd class="col-sm-8">{{ resident.birth_place or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Sex</dt><dd class="col-sm-8">{{ resident.sex or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Civil Status</dt><dd class="col-sm-8">{{ resident.civil_status or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Nationality / Religion</dt>
+          <dd class="col-sm-8">{{ resident.nationality or '—' }} / {{ resident.religion or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Occupation</dt><dd class="col-sm-8">{{ resident.occupation or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Contact Number</dt><dd class="col-sm-8">{{ resident.contact_number or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Email</dt><dd class="col-sm-8">{{ resident.email or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Address</dt><dd class="col-sm-8">{{ resident.address or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Purok</dt><dd class="col-sm-8">{{ resident.purok or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Voter Status</dt><dd class="col-sm-8">{{ resident.voter_status or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Residency Status</dt><dd class="col-sm-8">{{ resident.residency_status or '—' }}</dd>
+          <dt class="col-sm-4 small text-muted fw-normal">Registered On</dt><dd class="col-sm-8">{{ resident.created_at | datefmt('%B %d, %Y %I:%M %p') }}</dd>
+        </dl>
+
+        <hr class="d-none d-print-block">
+        <p class="small text-muted d-none d-print-block">
+          Printed from BarangayConnect on {{ current_date }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Document request history -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-file-earmark-text me-2"></i>Document Request History</div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead><tr><th>Request No.</th><th>Document Type</th><th>Date</th><th>Status</th><th>Remarks</th></tr></thead>
+          <tbody>
+            {% for req in requests %}
+            <tr>
+              <td class="fw-semibold">{{ req.request_number }}</td>
+              <td>{{ req.document_type }}</td>
+              <td>{{ req.request_date | datefmt }}</td>
+              <td>{{ status_badge(req.status) }}</td>
+              <td class="small text-muted">{{ req.remarks or '—' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted py-4">No document requests on file.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

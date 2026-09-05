@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Announcements | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2">Announcements</h1>
+    <p class="text-white-50 mb-0">Latest news and advisories from the Barangay Hall</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <form method="get" class="row g-2 mb-4 no-print">
+    <div class="col-md-6 col-lg-4">
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Search announcements...">
+        <button class="btn btn-bc" type="submit">Search</button>
+        {% if q %}<a href="{{ url_for('public_announcements') }}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+      </div>
+    </div>
+  </form>
+
+  {% if announcements %}
+  <div class="row g-4">
+    {% for a in announcements %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 event-card">
+        {% if a.image %}
+        <img src="{{ url_for('static', filename='uploads/' ~ a.image) }}" class="card-img-top" alt="" style="height:180px;object-fit:cover;">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" class="card-img-top" alt="" style="height:180px;object-fit:cover;">
+        {% endif %}
+        <div class="card-body">
+          <small class="text-muted">
+            <i class="bi bi-calendar3 me-1"></i>{{ a.published_date | datefmt }}
+            {% if a.author %} · <i class="bi bi-person me-1"></i>{{ a.author }}{% endif %}
+          </small>
+          <h5 class="card-title mt-2 fw-bold fs-6">{{ a.title }}</h5>
+          <p class="card-text small text-muted">{{ a.content | striptags | truncate(130) }}</p>
+        </div>
+        <div class="card-footer bg-white border-0 pb-3">
+          <a href="{{ url_for('announcement_detail', announcement_id=a.id) }}" class="btn btn-sm btn-outline-bc">Read more</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-inbox display-4 text-muted"></i>
+    <p class="text-muted mt-3">No announcements found{% if q %} matching "{{ q }}"{% endif %}.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

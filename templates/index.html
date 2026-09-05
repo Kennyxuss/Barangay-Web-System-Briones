@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Home | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<!-- Hero -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill">
+          <i class="bi bi-shield-check me-1"></i> Official Barangay Portal
+        </span>
+        <h1 class="display-5">Welcome to <span class="text-warning">Brgy. Wao Lanao</span></h1>
+        <p class="lead text-white-50 mt-3">
+          Your digital gateway to Barangay services, information,
+          announcements, and community programs.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a href="{{ url_for('request_document') }}" class="btn btn-warning btn-lg px-4 fw-semibold">
+            <i class="bi bi-file-earmark-text me-2"></i>Request a Document
+          </a>
+          <a href="{{ url_for('public_announcements') }}" class="btn btn-outline-light btn-lg px-4">
+            <i class="bi bi-megaphone me-2"></i>View Announcements
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-3 text-white">
+          <div class="col-6">
+            <div class="stat-chip h-100">
+              <div class="num">{{ stats.residents }}</div>
+              <small class="opacity-75"><i class="bi bi-people me-1"></i>Registered Residents</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-chip h-100">
+              <div class="num">{{ stats.officials }}</div>
+              <small class="opacity-75"><i class="bi bi-person-badge me-1"></i>Active Officials</small>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="stat-chip d-flex align-items-center gap-3 text-start">
+              <i class="bi bi-telephone-outbound fs-3 text-warning"></i>
+              <div>
+                <div class="num">{{ settings.contact_number or '—' }}</div>
+                <small class="opacity-75">Barangay Hall Hotline &middot; Open 8AM–5PM</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick services -->
+<section class="container py-5">
+  <h2 class="section-title mb-4">How can we help you today?</h2>
+  <div class="row g-4">
+    {% set quick = [
+      ('Request a Document', 'Apply for barangay clearances and certificates online and track them in real time.', 'bi-file-earmark-text', url_for('request_document')),
+      ('File a Complaint', 'Report community concerns directly to barangay officials.', 'bi-megaphone-fill', url_for('complaint_file')),
+      ('Meet the Officials', 'Know your Punong Barangay, Kagawads, SK, and staff.', 'bi-people-fill', url_for('public_officials')),
+      ('Community Events', 'Join clean-up drives, health missions, and youth programs.', 'bi-calendar-event-fill', url_for('public_events'))
+    ] %}
+    {% for title, desc, icon, link in quick %}
+    <div class="col-md-6 col-xl-3">
+      <a href="{{ link }}" class="text-decoration-none">
+        <div class="card h-100 event-card">
+          <div class="card-body p-4">
+            <div class="icon-wrap stat-card mb-3" style="width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--bc-primary-light);color:var(--bc-primary);font-size:1.4rem;">
+              <i class="bi {{ icon }}"></i>
+            </div>
+            <h5 class="card-title text-body fw-bold">{{ title }}</h5>
+            <p class="card-text small text-muted mb-0">{{ desc }}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Latest announcements -->
+<section class="py-5" style="background:#fff;">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h2 class="section-title mb-0">Latest Announcements</h2>
+        <p class="text-muted small mt-2 mb-0">Important advisories for every resident.</p>
+      </div>
+      <a href="{{ url_for('public_announcements') }}" class="btn btn-outline-bc btn-sm">
+        View all <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+    <div class="row g-4">
+      {% if announcements %}
+        {% for a in announcements %}
+        <div class="col-md-4">
+          <div class="card h-100 event-card">
+            {% if a.image %}
+            <img src="{{ url_for('static', filename='uploads/' ~ a.image) }}" class="card-img-top" alt="" style="height:160px;object-fit:cover;">
+            {% else %}
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" class="card-img-top" alt="" style="height:160px;object-fit:cover;">
+            {% endif %}
+            <div class="card-body">
+              <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ a.published_date | datefmt }}
+                {% if a.author %} · <i class="bi bi-person me-1"></i>{{ a.author }}{% endif %}</small>
+              <h5 class="card-title mt-2 fw-bold fs-6">{{ a.title }}</h5>
+              <p class="card-text small text-muted">{{ a.content | striptags | truncate(110) }}</p>
+            </div>
+            <div class="card-footer bg-white border-0 pb-3">
+              <a href="{{ url_for('announcement_detail', announcement_id=a.id) }}" class="btn btn-sm btn-bc">Read more</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No announcements published yet. Please check back soon.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Upcoming events + hotlines -->
+<section class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <h2 class="section-title mb-4">Upcoming Events</h2>
+      {% if events %}
+        <div class="d-flex flex-column gap-3">
+          {% for e in events %}
+          <div class="card event-card overflow-hidden">
+            <div class="d-flex gap-0 align-items-stretch">
+              {% if e.image %}
+              <img src="{{ url_for('static', filename='uploads/' ~ e.image) }}" alt="" style="width:130px;object-fit:cover;min-height:100px;">
+              {% endif %}
+              <div class="card-body d-flex gap-3 align-items-center flex-grow-1">
+                <div class="event-date flex-shrink-0">
+                  <div class="day">{{ e.event_date | datefmt('%d') }}</div>
+                  <div class="mon">{{ e.event_date | datefmt('%b') }}</div>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="fw-bold mb-1">{{ e.title }}</h6>
+                  <p class="small text-muted mb-1"><i class="bi bi-clock me-1"></i>{{ e.start_time | timefmt }}
+                    &nbsp;<i class="bi bi-geo-alt me-1"></i>{{ e.location or 'TBA' }}</p>
+                  <p class="small mb-0 text-muted">{{ e.description | truncate(120) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <a href="{{ url_for('public_events') }}" class="btn btn-outline-bc btn-sm mt-3">
+          See full calendar <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      {% else %}
+        <p class="text-muted">No upcoming events scheduled yet.</p>
+      {% endif %}
+    </div>
+    <div class="col-lg-4">
+      <h2 class="section-title mb-4">Emergency Hotlines</h2>
+      <div class="hotline-strip p-4">
+        {% for line in (settings.hotlines or '').split('\n') if line.strip() %}
+          <p class="mb-2 fw-semibold"><i class="bi bi-broadcast me-2 text-danger"></i>{{ line }}</p>
+        {% endfor %}
+        <hr>
+        <p class="small mb-0 text-muted">In case of emergency, call the numbers above or visit the Barangay Hall at
+          {{ settings.address or '' }}.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

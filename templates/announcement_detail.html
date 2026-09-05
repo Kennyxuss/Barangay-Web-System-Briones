@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.title }} | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="no-print">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('public_announcements') }}">Announcements</a></li>
+      <li class="breadcrumb-item active">{{ item.title | truncate(40) }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <article class="col-lg-8">
+      <div class="card">
+        {% if item.image %}
+        <img src="{{ url_for('static', filename='uploads/' ~ item.image) }}" class="card-img-top"
+             style="max-height:380px;object-fit:cover;" alt="">
+        {% endif %}
+        <div class="card-body p-4">
+          <h1 class="fw-bold mb-3">{{ item.title }}</h1>
+          <p class="text-muted small">
+            <i class="bi bi-calendar3 me-1"></i>Published {{ item.published_date | datefmt }}
+            &nbsp;·&nbsp; <i class="bi bi-person me-1"></i>{{ item.author or 'Barangay Hall' }}
+          </p>
+          <hr>
+          <div class="announcement-content" style="white-space:pre-line;">{{ item.content }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('public_announcements') }}" class="btn btn-outline-bc btn-sm mt-3 no-print">
+        <i class="bi bi-arrow-left me-1"></i>Back to announcements
+      </a>
+    </article>
+    <aside class="col-lg-4 no-print">
+      <div class="card">
+        <div class="card-header">Other Announcements</div>
+        <ul class="list-group list-group-flush">
+          {% for o in others %}
+          <li class="list-group-item">
+            <a href="{{ url_for('announcement_detail', announcement_id=o.id) }}"
+               class="text-decoration-none fw-semibold d-block mb-1">{{ o.title }}</a>
+            <small class="text-muted">{{ o.published_date | datefmt }}</small>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted small">No other announcements.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

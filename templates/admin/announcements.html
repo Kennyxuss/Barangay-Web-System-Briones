@@ -1,0 +1,55 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Announcements{% endblock %}
+{% block page_subtitle %}Publish news and advisories to the public website{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <form method="get" class="d-flex gap-2 search-input-group">
+    <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Search announcements...">
+    <select name="status" class="form-select form-select-sm w-auto">
+      <option value="">All statuses</option>
+      <option value="Published" {{ 'selected' if status == 'Published' }}>Published</option>
+      <option value="Unpublished" {{ 'selected' if status == 'Unpublished' }}>Unpublished</option>
+    </select>
+    <button class="btn btn-sm btn-outline-secondary">Go</button>
+  </form>
+  <a href="{{ url_for('admin_announcement_add') }}" class="btn btn-bc"><i class="bi bi-plus-lg me-1"></i>Add Announcement</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th style="min-width:220px;">Title</th><th>Author</th><th>Published</th><th>Status</th><th class="text-end no-print">Actions</th></tr></thead>
+      <tbody>
+        {% for a in announcements %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              {% if a.image %}
+              <img src="{{ url_for('static', filename='uploads/' ~ a.image) }}" class="rounded object-fit-cover" width="44" height="44" alt="" style="object-fit:cover;">
+              {% endif %}
+              <span class="fw-semibold">{{ a.title }}</span>
+            </div>
+          </td>
+          <td class="small">{{ a.author or '—' }}</td>
+          <td class="small text-nowrap">{{ a.published_date | datefmt('%b %d, %Y') }}</td>
+          <td>{{ status_badge(a.status) }}</td>
+          <td class="text-end no-print text-nowrap">
+            <a href="{{ url_for('admin_announcement_edit', announcement_id=a.id) }}" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_announcement_delete', announcement_id=a.id) }}"
+                    data-confirm-title="Delete announcement?"
+                    data-confirm-text='Delete "{{ a.title }}"? This cannot be undone.'>
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-5">No announcements found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

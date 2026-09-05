@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Resident Registration | {{ system_name }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2"><i class="bi bi-person-plus me-2"></i>Create Resident Account</h1>
+    <p class="text-white-50 mb-0">Register with full details — admin will review before approval</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-sm">
+        <div class="card-header py-3"><i class="bi bi-shield-lock me-2"></i>Resident Registration — Pending Admin Approval</div>
+        <div class="card-body p-4">
+          <form method="post" action="{{ url_for('register') }}" enctype="multipart/form-data" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+            <h6 class="fw-bold text-bc mb-3">Account Credentials</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                <input type="text" name="username" class="form-control" required maxlength="30" pattern="[A-Za-z0-9_.]+"
+                       value="{{ form.username or '' }}" placeholder="e.g., juan.delacruz">
+                <div class="form-text">3-30 chars: letters, numbers, dot, underscore (lowercase).</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                <input type="text" name="full_name" class="form-control" required maxlength="100"
+                       value="{{ form.full_name or '' }}" placeholder="Juan Dela Cruz">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                <input type="password" name="password" class="form-control" required minlength="6" placeholder="Min. 6 characters">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                <input type="password" name="confirm_password" class="form-control" required minlength="6" placeholder="Repeat password">
+              </div>
+            </div>
+
+            <hr class="my-4">
+            <h6 class="fw-bold text-bc mb-3">Personal Information</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                <input type="text" name="first_name" class="form-control" required maxlength="60" value="{{ form.first_name or '' }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Middle Name</label>
+                <input type="text" name="middle_name" class="form-control" maxlength="60" value="{{ form.middle_name or '' }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                <input type="text" name="last_name" class="form-control" required maxlength="60" value="{{ form.last_name or '' }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Suffix (Jr., Sr., III…)</label>
+                <input type="text" name="suffix" class="form-control" maxlength="10" value="{{ form.suffix or '' }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Sex <span class="text-danger">*</span></label>
+                <select name="sex" class="form-select" required>
+                  <option value="" disabled {{ 'selected' if not form.sex }}>Select...</option>
+                  <option value="Male" {{ 'selected' if form.sex=='Male' }}>Male</option>
+                  <option value="Female" {{ 'selected' if form.sex=='Female' }}>Female</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Birth Date <span class="text-danger">*</span></label>
+                <input type="date" name="birth_date" class="form-control" required value="{{ form.birth_date or '' }}" min="1900-01-01" max="{{ current_year }}-12-31">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Place of Birth</label>
+                <input type="text" name="birth_place" class="form-control" maxlength="120" value="{{ form.birth_place or '' }}" placeholder="e.g., Sampaguita, Laguna">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Civil Status</label>
+                <select name="civil_status" class="form-select">
+                  <option value="">Select...</option>
+                  {% for cs in ['Single','Married','Widowed','Separated'] %}
+                  <option value="{{ cs }}" {{ 'selected' if form.civil_status==cs }}>{{ cs }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Nationality</label>
+                <input type="text" name="nationality" class="form-control" maxlength="40" value="{{ form.nationality or 'Filipino' }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Religion</label>
+                <input type="text" name="religion" class="form-control" maxlength="50" value="{{ form.religion or '' }}">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Occupation</label>
+                <input type="text" name="occupation" class="form-control" maxlength="80" value="{{ form.occupation or '' }}">
+              </div>
+            </div>
+
+            <hr class="my-4">
+            <h6 class="fw-bold text-bc mb-3">Contact &amp; Address</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Contact Number</label>
+                <input type="tel" name="contact_number" class="form-control" maxlength="20" value="{{ form.contact_number or '' }}" placeholder="0917-000-0000">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" maxlength="120" value="{{ form.email or '' }}" placeholder="you@example.com">
+              </div>
+              <div class="col-md-8">
+                <label class="form-label fw-semibold">Complete Address <span class="text-danger">*</span></label>
+                <textarea name="address" class="form-control" rows="2" required maxlength="200">{{ form.address or '' }}</textarea>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Purok <span class="text-danger">*</span></label>
+                <select name="purok" class="form-select" required>
+                  <option value="" disabled {{ 'selected' if not form.purok }}>Select...</option>
+                  {% for i in range(1,8) %}
+                  <option value="Purok {{ i }}" {{ 'selected' if form.purok=='Purok ' ~ i }}>Purok {{ i }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <hr class="my-4">
+            <h6 class="fw-bold text-bc mb-3">Status &amp; Photo</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Voter Status</label>
+                <select name="voter_status" class="form-select">
+                  <option value="">Select...</option>
+                  <option value="Registered" {{ 'selected' if form.voter_status=='Registered' }}>Registered</option>
+                  <option value="Not Registered" {{ 'selected' if form.voter_status=='Not Registered' }}>Not Registered</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Residency Status</label>
+                <select name="residency_status" class="form-select">
+                  <option value="">Select...</option>
+                  {% for r in ['Permanent','Renting','Transient'] %}
+                  <option value="{{ r }}" {{ 'selected' if form.residency_status==r }}>{{ r }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Resident Photo</label>
+                <input type="file" name="photo" accept=".png,.jpg,.jpeg,.webp,.gif" class="form-control">
+                <div class="form-text">JPG/PNG/WebP, max 5 MB — same as admin view.</div>
+              </div>
+            </div>
+
+            <div class="alert alert-warning small mt-4 mb-0">
+              <i class="bi bi-clock-history me-1"></i>Your registration will be <strong>pending admin review</strong>. You cannot log in until an administrator approves your account. You will see <em>“pending approval”</em> if you try to log in before approval.
+            </div>
+
+            <button type="submit" class="btn btn-bc btn-lg mt-4 px-5"><i class="bi bi-person-check me-2"></i>Submit Registration</button>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg mt-4 ms-2">Already have an account? Login</a>
+          </form>
+        </div>
+      </div>
+
+      <div class="alert alert-info small mt-3">
+        <i class="bi bi-info-circle me-1"></i>If your name and birth date already exist and that record is unlinked, it will be linked instead of creating a duplicate (admin can still review all fields). Admin reviews at <strong>Admin → Pending Registrations</strong> — same detailed view as <em>Residents → View Profile</em> with Approve/Reject buttons.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}My Documents | {{ system_name }}{% endblock %}
+{% block content %}
+<section class="hero-section py-4">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-text me-2"></i>My Document Requests</h2>
+    <p class="text-white-50 mb-0">Track all your document requests — linked to {{ resident.resident_id }}</p>
+  </div>
+</section>
+<div class="container py-4">
+  <ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_dashboard') }}">Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_profile') }}">My Profile</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('resident_my_documents') }}">My Documents</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_my_complaints') }}">My Complaints</a></li>
+  </ul>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">History ({{ docs|length }})</h5>
+    <a href="{{ url_for('resident_request_document') }}" class="btn btn-bc btn-sm"><i class="bi bi-plus-lg me-1"></i>New Request</a>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Request #</th><th>Document</th><th>Purpose</th><th>Date</th><th>Status</th><th>Remarks</th></tr></thead>
+        <tbody>
+          {% for d in docs %}
+          <tr>
+            <td class="small fw-bold">{{ d.request_number }}</td>
+            <td class="small">{{ d.document_type }}</td>
+            <td class="small">{{ d.purpose }}</td>
+            <td class="small">{{ d.request_date | datefmt('%b %d, %Y') }}</td>
+            <td>{{ status_badge(d.status) }}</td>
+            <td class="small">{{ d.remarks or '—' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No document requests yet. <a href="{{ url_for('resident_request_document') }}">Request a document</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

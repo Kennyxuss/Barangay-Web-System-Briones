@@ -1,0 +1,54 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Barangay Officials{% endblock %}
+{% block page_subtitle %}Elected and appointed officials of the barangay{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ url_for('admin_official_add') }}" class="btn btn-bc">
+    <i class="bi bi-plus-lg me-1"></i>Add Official
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr><th>Photo</th><th>Full Name</th><th>Position</th><th>Contact</th><th>Email</th><th>Term</th><th>Status</th><th class="text-end no-print">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for o in officials %}
+        <tr>
+          <td>
+            {% if o.photo %}
+            <img src="{{ url_for('static', filename='uploads/' ~ o.photo) }}" class="avatar-sm" style="object-fit:cover;" alt="">
+            {% else %}
+            <img src="{{ url_for('static', filename='images/avatar.svg') }}" class="avatar-sm" alt="">
+            {% endif %}
+          </td>
+          <td class="fw-semibold">{{ o.full_name }}</td>
+          <td><span class="badge bg-light text-dark border">{{ o.position }}</span></td>
+          <td class="text-nowrap">{{ o.contact_number or '—' }}</td>
+          <td>{{ o.email or '—' }}</td>
+          <td class="text-nowrap small text-muted">
+            {{ o.term_start | datefmt('%b %Y') if o.term_start else '—' }} – {{ o.term_end | datefmt('%b %Y') if o.term_end else '—' }}
+          </td>
+          <td>{{ status_badge(o.status) }}</td>
+          <td class="text-end no-print text-nowrap">
+            <a href="{{ url_for('admin_official_edit', official_id=o.id) }}" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_official_delete', official_id=o.id) }}"
+                    data-confirm-title="Remove official?"
+                    data-confirm-text="Delete {{ o.full_name }} ({{ o.position }})? This cannot be undone.">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-5">No officials recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

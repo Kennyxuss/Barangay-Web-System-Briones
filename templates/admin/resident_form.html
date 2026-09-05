@@ -1,0 +1,149 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Fill out the resident information form below{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-vcard me-2"></i>Resident Information</div>
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data" novalidate
+              action="{{ url_for('admin_resident_edit', resident_pk=resident.id) if resident and resident.id else url_for('admin_resident_add') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+          <h6 class="fw-bold text-bc mb-3">Personal Information</h6>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">First Name <span class="text-danger">*</span></label>
+              <input type="text" name="first_name" class="form-control" required maxlength="60"
+                     value="{{ resident.first_name or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Middle Name</label>
+              <input type="text" name="middle_name" class="form-control" maxlength="60"
+                     value="{{ resident.middle_name or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Last Name <span class="text-danger">*</span></label>
+              <input type="text" name="last_name" class="form-control" required maxlength="60"
+                     value="{{ resident.last_name or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Suffix (Jr., Sr., III...)</label>
+              <input type="text" name="suffix" class="form-control" maxlength="10"
+                     value="{{ resident.suffix or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Sex <span class="text-danger">*</span></label>
+              <select name="sex" class="form-select" required>
+                <option value="" disabled {{ 'selected' if not resident.sex }}>Select...</option>
+                <option value="Male" {{ 'selected' if resident.sex == 'Male' }}>Male</option>
+                <option value="Female" {{ 'selected' if resident.sex == 'Female' }}>Female</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Birth Date <span class="text-danger">*</span></label>
+              <input type="date" name="birth_date" class="form-control" required
+                     max="{{ current_year }}-12-31" min="1900-01-01"
+                     value="{{ resident.birth_date or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Place of Birth</label>
+              <input type="text" name="birth_place" class="form-control" maxlength="120"
+                     value="{{ resident.birth_place or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Civil Status</label>
+              <select name="civil_status" class="form-select">
+                <option value="">Select...</option>
+                {% for cs in ['Single', 'Married', 'Widowed', 'Separated'] %}
+                <option value="{{ cs }}" {{ 'selected' if resident.civil_status == cs }}>{{ cs }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Nationality</label>
+              <input type="text" name="nationality" class="form-control" maxlength="40"
+                     value="{{ resident.nationality or 'Filipino' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Religion</label>
+              <input type="text" name="religion" class="form-control" maxlength="50"
+                     value="{{ resident.religion or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Occupation</label>
+              <input type="text" name="occupation" class="form-control" maxlength="80"
+                     value="{{ resident.occupation or '' }}">
+            </div>
+          </div>
+
+          <hr class="my-4">
+          <h6 class="fw-bold text-bc mb-3">Contact &amp; Address</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Contact Number</label>
+              <input type="tel" name="contact_number" class="form-control" maxlength="20"
+                     placeholder="0917-000-0000" value="{{ resident.contact_number or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email Address</label>
+              <input type="email" name="email" class="form-control" maxlength="120"
+                     value="{{ resident.email or '' }}">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Complete Address <span class="text-danger">*</span></label>
+              <textarea name="address" class="form-control" rows="2" required
+                        maxlength="200">{{ resident.address or '' }}</textarea>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Purok <span class="text-danger">*</span></label>
+              <select name="purok" class="form-select" required>
+                <option value="" disabled {{ 'selected' if not resident.purok }}>Select...</option>
+                {% for i in range(1, 8) %}
+                <option value="Purok {{ i }}" {{ 'selected' if resident.purok == 'Purok ' ~ i }}>Purok {{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <hr class="my-4">
+          <h6 class="fw-bold text-bc mb-3">Status &amp; Photo</h6>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Voter Status</label>
+              <select name="voter_status" class="form-select">
+                <option value="">Select...</option>
+                <option value="Registered" {{ 'selected' if resident.voter_status == 'Registered' }}>Registered</option>
+                <option value="Not Registered" {{ 'selected' if resident.voter_status == 'Not Registered' }}>Not Registered</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Residency Status</label>
+              <select name="residency_status" class="form-select">
+                <option value="">Select...</option>
+                {% for r in ['Permanent', 'Renting', 'Transient'] %}
+                <option value="{{ r }}" {{ 'selected' if resident.residency_status == r }}>{{ r }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Resident Photo</label>
+              <input type="file" name="photo" accept=".png,.jpg,.jpeg,.webp,.gif" class="form-control">
+              <div class="form-text">JPG/PNG/WebP, max 5 MB.</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4 pt-2 border-top">
+            <button type="submit" class="btn btn-bc px-4">
+              <i class="bi bi-check-lg me-1"></i>{{ 'Save Changes' if resident and resident.id else 'Add Resident' }}
+            </button>
+            <a href="{{ url_for('admin_residents') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

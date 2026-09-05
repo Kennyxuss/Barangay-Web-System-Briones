@@ -1,0 +1,88 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Pending Registrations{% endblock %}
+{% block page_subtitle %}Review new resident registrations before approval — same full details as Resident Profile{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-person-plus me-2"></i>Pending Resident Accounts <span class="badge bg-warning text-dark ms-2">{{ pending|length }}</span></span>
+    <a href="{{ url_for('admin_users') }}" class="btn btn-sm btn-outline-secondary">View All Users</a>
+  </div>
+  {% if pending|length == 0 %}
+  <div class="card-body text-center text-muted py-5">
+    <i class="bi bi-check-circle fs-1 d-block mb-2 opacity-25"></i>
+    No pending registrations. All resident accounts are approved.
+  </div>
+  {% else %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Submitted</th>
+          <th>Username</th>
+          <th>Linked Resident</th>
+          <th>Full Info (Admin View)</th>
+          <th>Purok</th>
+          <th>Contact</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in pending %}
+        <tr>
+          <td class="small text-muted text-nowrap">{{ u.created_at | datefmt('%b %d, %Y %I:%M %p') }}</td>
+          <td>
+            <span class="fw-semibold">{{ u.username }}</span><br>
+            <small class="text-muted">{{ u.full_name }}</small><br>
+            <small class="text-muted">{{ u.email or '—' }}</small>
+          </td>
+          <td>
+            {% if u.r_resident_id %}
+              <span class="fw-semibold">{{ u.r_resident_id }}</span><br>
+              <small>{{ u.first_name }} {{ u.middle_name or '' }} {{ u.last_name }}</small><br>
+              <small class="text-muted">{{ u.sex }} • {{ u.birth_date | datefmt('%b %d, %Y') }} ({{ u.birth_date | age }} yrs)</small>
+            {% else %}
+              <span class="text-danger small">No linked resident</span>
+            {% endif %}
+          </td>
+          <td class="small">
+            {% if u.r_resident_id %}
+              <div><strong>Address:</strong> {{ u.r_address or '—' }}</div>
+              <div><strong>Birth Place:</strong> {{ u.birth_place or '—' }} | <strong>Civil:</strong> {{ u.civil_status or '—' }}</div>
+              <div><strong>Nationality:</strong> {{ u.nationality or '—' }} | <strong>Religion:</strong> {{ u.religion or '—' }}</div>
+              <div><strong>Occupation:</strong> {{ u.occupation or '—' }} | <strong>Voter:</strong> {{ u.voter_status or '—' }} | <strong>Residency:</strong> {{ u.residency_status or '—' }}</div>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td class="small">{{ u.r_purok or '—' }}</td>
+          <td class="small text-nowrap">{{ u.r_contact or u.email or '—' }}</td>
+          <td class="text-end text-nowrap">
+            <a href="{{ url_for('admin_registration_view', user_id=u.id) }}" class="btn btn-sm btn-outline-primary" title="View full profile like Admin View">
+              <i class="bi bi-eye"></i> Review
+            </a>
+            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_registration_approve', user_id=u.id) }}"
+                    data-confirm-title="Approve registration?"
+                    data-confirm-text="Approve account '{{ u.username }}' — resident {{ u.r_resident_id }}? They will be able to log in immediately.">
+              <i class="bi bi-check-lg"></i> Approve
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_registration_reject', user_id=u.id) }}"
+                    data-confirm-title="Reject registration?"
+                    data-confirm-text="Reject and delete pending account '{{ u.username }}'? Resident record will be kept for review (delete manually if needed).">
+              <i class="bi bi-x-lg"></i> Reject
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="alert alert-info small mt-3">
+  <i class="bi bi-info-circle me-1"></i><strong>How review works:</strong> This table shows the same full details as <em>Residents → View Profile</em> (photo, suffix, birth place, civil status, nationality, religion, occupation, voter/residency status, purok, address, contact). Click <strong>Review</strong> to see the exact admin profile page with print support, then Approve or Reject.
+</div>
+{% endblock %}

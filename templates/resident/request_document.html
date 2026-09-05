@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Request a Document | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2"><i class="bi bi-file-earmark-text me-2"></i>Request a Document</h1>
+    <p class="text-white-50 mb-0">Apply online — track your request using your request number</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      {% if form %}
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>Please review the highlighted errors below and resubmit.
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <div class="card-header py-3"><i class="bi bi-journal-check me-2"></i>Document Request Form</div>
+        <div class="card-body p-4">
+          <form method="post" action="{{ url_for('request_document') }}" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <h6 class="fw-bold text-bc mb-3">Requester Information</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                <input type="text" name="requester_name" class="form-control" required maxlength="100"
+                       value="{{ form.requester_name or '' }}" placeholder="Juan Dela Cruz">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Contact Number <span class="text-danger">*</span></label>
+                <input type="tel" name="contact_number" class="form-control" required maxlength="20"
+                       value="{{ form.contact_number or '' }}" placeholder="0917-000-0000">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email Address</label>
+                <input type="email" name="email" class="form-control" maxlength="120"
+                       value="{{ form.email or '' }}" placeholder="you@example.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Address <span class="text-danger">*</span></label>
+                <input type="text" name="address" class="form-control" required maxlength="200"
+                       value="{{ form.address or '' }}" placeholder="Purok / Street / Barangay">
+              </div>
+            </div>
+
+            <hr class="my-4">
+            <h6 class="fw-bold text-bc mb-3">Document Details</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Document Type <span class="text-danger">*</span></label>
+                <select name="document_type" class="form-select" required>
+                  <option value="" disabled {{ 'selected' if not form.document_type }}>Select document...</option>
+                  {% for dt in document_types %}
+                  <option value="{{ dt }}" {{ 'selected' if form.document_type == dt }}>{{ dt }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Purpose <span class="text-danger">*</span></label>
+                <input type="text" name="purpose" class="form-control" required maxlength="150"
+                       value="{{ form.purpose or '' }}" placeholder="e.g., Local employment requirement">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Additional Information</label>
+                <textarea name="additional_info" class="form-control" rows="3" maxlength="500"
+                          placeholder="Optional details that may help process your request faster">{{ form.additional_info or '' }}</textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-bc btn-lg mt-4 px-5">
+              <i class="bi bi-send me-2"></i>Submit Request
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-body small">
+          <strong><i class="bi bi-info-circle me-1"></i>What happens next?</strong>
+          <ol class="mb-0 mt-2">
+            <li>You will receive a unique <strong>request number</strong> (e.g., REQ-2026-00001).</li>
+            <li>The barangay office reviews your request (status becomes <em>Pending &rarr; Processing &rarr; Approved</em>).</li>
+            <li>Once approved and signed, you may claim it at the Barangay Hall during office hours.</li>
+            <li>Track anytime via the <a href="{{ url_for('request_status') }}">Check Request Status</a> page.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

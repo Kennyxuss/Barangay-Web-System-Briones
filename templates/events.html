@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Events | Barangay {{ settings.barangay_name or '' }}{% endblock %}
+
+{% macro event_card(e) %}
+<div class="col-md-6 col-lg-4">
+  <div class="card h-100 event-card overflow-hidden">
+    {% if e.image %}
+    <img src="{{ url_for('static', filename='uploads/' ~ e.image) }}" class="card-img-top" alt="{{ e.title }}" style="height:180px;object-fit:cover;">
+    {% else %}
+    <div class="d-flex align-items-center justify-content-center bg-light text-muted" style="height:180px;">
+      <i class="bi bi-calendar-event fs-1 opacity-25"></i>
+    </div>
+    {% endif %}
+    <div class="card-body p-4">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="event-date">
+          <div class="day">{{ e.event_date | datefmt('%d') }}</div>
+          <div class="mon">{{ e.event_date | datefmt('%b') }}</div>
+        </div>
+        <div>
+          <span class="badge bg-light text-dark border">{{ e.event_date | datefmt('%Y') }}</span>
+          {% if e.start_time %}
+          <p class="small text-muted mb-0 mt-1"><i class="bi bi-clock me-1"></i>{{ e.start_time | timefmt }}
+            {% if e.end_time %}– {{ e.end_time | timefmt }}{% endif %}</p>
+          {% endif %}
+        </div>
+      </div>
+      <h5 class="card-title fw-bold">{{ e.title }}</h5>
+      <p class="card-text small text-muted">{{ e.description | truncate(140) }}</p>
+      <p class="small mb-0">
+        <span class="d-block mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ e.location or 'TBA' }}</span>
+        {% if e.organizer %}<span><i class="bi bi-person-badge me-1"></i>{{ e.organizer }}</span>{% endif %}
+      </p>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2">Community Events</h1>
+    <p class="text-white-50 mb-0">Activities, programs, and gatherings in our barangay</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <h2 class="section-title mb-4">Upcoming Events</h2>
+  {% if upcoming %}
+  <div class="row g-4 mb-5">
+    {% for e in upcoming %}{{ event_card(e) }}{% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted mb-5">No upcoming events scheduled yet. Please check back soon.</p>
+  {% endif %}
+
+  {% if past %}
+  <hr class="mb-4">
+  <h2 class="section-title mb-4">Past Events</h2>
+  <div class="table-responsive card">
+    <table class="table table-striped align-middle mb-0">
+      <thead><tr><th>Date</th><th>Title</th><th>Location</th></tr></thead>
+      <tbody>
+        {% for e in past %}
+        <tr>
+          <td class="text-nowrap">{{ e.event_date | datefmt }}</td>
+          <td class="fw-semibold">{{ e.title }}</td>
+          <td>{{ e.location or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

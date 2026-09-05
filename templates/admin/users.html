@@ -1,0 +1,67 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Users{% endblock %}
+{% block page_subtitle %}Manage administrator, staff and resident accounts (admin only){% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ url_for('admin_user_add') }}" class="btn btn-bc"><i class="bi bi-person-plus me-1"></i>Add User</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Email</th><th>Status</th><th>Created</th><th class="text-end no-print">Actions</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="{{ 'table-light' if u.status == 'inactive' }}">
+          <td class="fw-semibold">
+            <img src="{{ url_for('static', filename='images/avatar.svg') }}" class="avatar-sm me-2" alt="">
+            {{ u.username }}
+            {% if current_user.id == u.id %}<span class="badge bg-primary ms-1">You</span>{% endif %}
+          </td>
+          <td>{{ u.full_name }}</td>
+          <td>
+            {% if u.role == 'admin' %}
+              <span class="badge bg-danger">Administrator</span>
+            {% elif u.role == 'resident' %}
+              <span class="badge bg-success">Resident</span>
+            {% else %}
+              <span class="badge bg-primary">Staff</span>
+            {% endif %}
+            {% if u.resident_id %}<small class="text-muted d-block">→ {{ u.resident_id }}</small>{% endif %}
+          </td>
+          <td class="small">{{ u.email or '—' }}</td>
+          <td>
+            {% if u.status == 'active' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+            {% elif u.status == 'pending' %}
+              <span class="badge bg-warning text-dark border border-warning-subtle">Pending</span>
+            {% else %}
+              <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inactive</span>
+            {% endif %}
+          </td>
+          <td class="small text-muted">{{ u.created_at | datefmt('%b %d, %Y') }}</td>
+          <td class="text-end no-print text-nowrap">
+            <a href="{{ url_for('admin_user_edit', user_id=u.id) }}" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+            {% if current_user.id != u.id %}
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                    data-bs-toggle="modal" data-bs-target="#confirmModal"
+                    data-confirm-url="{{ url_for('admin_user_delete', user_id=u.id) }}"
+                    data-confirm-title="Delete user?"
+                    data-confirm-text="Delete account '{{ u.username }}'? This cannot be undone.">
+              <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="alert alert-warning small mt-3 no-print">
+  <i class="bi bi-exclamation-triangle-fill me-1"></i><strong>Security reminder:</strong>
+  You cannot delete your own account or the last active administrator. Changing your own role/status is also blocked
+  to prevent accidental lock-out.
+</div>
+{% endblock %}

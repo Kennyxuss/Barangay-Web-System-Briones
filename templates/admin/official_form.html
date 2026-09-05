@@ -1,0 +1,69 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Official information record{% endblock %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+  <div class="col-xl-9">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-badge me-2"></i>Official Details</div>
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data"
+              action="{{ url_for('admin_official_edit', official_id=official.id) if official else url_for('admin_official_add') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" class="form-control" required maxlength="100"
+                     value="{{ official.full_name or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Position <span class="text-danger">*</span></label>
+              <select name="position" class="form-select" required>
+                <option value="" disabled {{ 'selected' if not official.position }}>Select position...</option>
+                {% for pos in positions %}
+                <option value="{{ pos }}" {{ 'selected' if official.position == pos }}>{{ pos }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contact Number</label>
+              <input type="tel" name="contact_number" class="form-control" maxlength="20"
+                     value="{{ official.contact_number or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" maxlength="120"
+                     value="{{ official.email or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Term Start</label>
+              <input type="date" name="term_start" class="form-control" value="{{ official.term_start or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Term End</label>
+              <input type="date" name="term_end" class="form-control" value="{{ official.term_end or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Status</label>
+              <select name="status" class="form-select">
+                <option value="Active" {{ 'selected' if not official or official.status == 'Active' }}>Active</option>
+                <option value="Inactive" {{ 'selected' if official and official.status == 'Inactive' }}>Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Photo</label>
+              <input type="file" name="photo" accept=".png,.jpg,.jpeg,.webp,.gif" class="form-control">
+              <div class="form-text">Optional. JPG/PNG/WebP, max 5 MB.</div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4 pt-2 border-top">
+            <button type="submit" class="btn btn-bc px-4"><i class="bi bi-check-lg me-1"></i>Save</button>
+            <a href="{{ url_for('admin_officials') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}My Complaints | {{ system_name }}{% endblock %}
+{% block content %}
+<section class="hero-section py-4">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-megaphone me-2"></i>My Complaints</h2>
+    <p class="text-white-50 mb-0">Track your complaints — linked to {{ resident.resident_id }}</p>
+  </div>
+</section>
+<div class="container py-4">
+  <ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_dashboard') }}">Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('resident_my_documents') }}">My Documents</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{{ url_for('resident_my_complaints') }}">My Complaints</a></li>
+  </ul>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">History ({{ complaints|length }})</h5>
+    <a href="{{ url_for('resident_file_complaint') }}" class="btn btn-danger btn-sm"><i class="bi bi-plus-lg me-1"></i>File Complaint</a>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Complaint #</th><th>Subject</th><th>Location</th><th>Date</th><th>Status</th><th>Remarks</th></tr></thead>
+        <tbody>
+          {% for c in complaints %}
+          <tr>
+            <td class="small fw-bold">{{ c.complaint_number }}</td>
+            <td class="small">{{ c.subject }}</td>
+            <td class="small">{{ c.location or '—' }}</td>
+            <td class="small">{{ c.date_reported | datefmt('%b %d, %Y') }}</td>
+            <td>{{ status_badge(c.status) }}</td>
+            <td class="small">{{ c.remarks or '—' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No complaints yet. <a href="{{ url_for('resident_file_complaint') }}">File one</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
